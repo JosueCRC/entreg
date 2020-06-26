@@ -7,6 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
   <script src="https://www.gstatic.com/firebasejs/7.15.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.15.2/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/7.14.5/firebase-auth.js"></script>
 
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons"rel="stylesheet">
 </head>
@@ -14,7 +15,82 @@
   <div id="app">
     <v-app>
       <v-main>
+
+
         <template>
+          <div>
+            <v-toolbar
+              dark
+              src="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg"
+            >
+              <v-app-bar-nav-icon></v-app-bar-nav-icon>
+        
+              <v-toolbar-title>As Limon</v-toolbar-title>
+        
+              <v-spacer></v-spacer>
+        
+              <v-btn icon  @click="cerrarSesion">
+                <v-icon>mdi-export</v-icon>
+
+              </v-btn>
+            </v-toolbar>
+          </div>
+
+          <v-card
+          
+            class="mx-auto mt-10"
+            max-width="400"
+            v-if="!visible"
+          >
+            <v-card-text>
+              <h1>Inicio de Sesion</h1>
+              <p class="display-1 text--primary">
+                <v-col cols="12" >
+                  <v-text-field      
+                  name="username"
+                  label="username"
+                  hint="At least 8 characters"
+                  value=""
+                  v-model="correoUsuario"   
+                >
+              </v-text-field>
+                
+                  <v-text-field
+                    v-model="password"
+                    :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
+                    :rules="[rules.required, rules.min]"
+                    :type="show1 ? 'text' : 'password'"
+                    name="input-10-1"
+                    label="contraseña"
+                    hint="At least 8 characters"
+                    counter
+                    @click:append="show1 = !show1"
+                  ></v-text-field>
+                
+                </v-col>
+              </p>
+            
+            </v-card-text>
+            <v-card-actions>
+              <v-btn
+                text
+                color="deep-purple accent-4"
+                @click="ingresoSistema"
+                :disabled="botosEsVisible"
+               
+              >
+                Ingreso
+              </v-btn>
+             
+            </v-card-actions>
+           
+
+          </v-card>
+        </template>
+        <template v-if="visible">
+         
+          
+        
           <v-data-table
             :headers="headers"
             :items="desserts"
@@ -24,7 +100,7 @@
 
           >
             <template v-slot:top>
-              <div>
+              <!-- <div>
                 <v-toolbar
                   dark
                   src="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg"
@@ -39,7 +115,7 @@
                     <v-icon>mdi-export</v-icon>
                   </v-btn>
                 </v-toolbar>
-              </div>
+              </div> -->
               <v-toolbar flat color="white">
                 <v-toolbar-title>My CRUD</v-toolbar-title>
                 <v-divider
@@ -53,7 +129,8 @@
                 label="Search"
                 single-line
                 hide-details
-              ></v-text-field>
+                >
+                </v-text-field>
               
                 <v-spacer></v-spacer>
                 <v-dialog v-model="dialog" max-width="700px">
@@ -65,6 +142,7 @@
                       v-bind="attrs"
                       v-on="on"
                     >New Item</v-btn>
+               
                   </template>
                   <v-card>
                     <v-card-title>
@@ -105,7 +183,7 @@
                 </v-dialog>
               </v-toolbar>
               
-                <v-footer
+               <!--  <v-footer
                   absolute
                   class="font-weight-medium"
                 >
@@ -116,7 +194,7 @@
                   Copyright © 2019-{{ new Date().getFullYear() }}
                      — <strong>Josue Gonzalez</strong>
                   </v-col>
-                </v-footer>
+                </v-footer> -->
 
             </template>
             
@@ -137,6 +215,7 @@
             </template>
             <template v-slot:no-data>
               <v-btn color="primary" @click="initialize">Reset</v-btn>
+           
             </template>
           </v-data-table>
         </template>
@@ -174,6 +253,7 @@
             querySnapshot.forEach((doc) => {         
             var fechaRegistro = new Date( doc.data().Fecha.seconds *1000).toLocaleString();
                 pacientes.push({
+                      tipoid: doc.Tipo,
                       varid: doc.id, 
                       cedula: doc.data().Cedula, 
                       nombre: doc.data().Nombre,
@@ -189,17 +269,31 @@
               console.log(querySnapshot.size);       
                           
           });
-     
+    
 
-      new Vue({
+
+
+
+      const cm = new Vue({
       el: '#app',
-
-      
-      vuetify: new Vuetify(),
-      
+      vuetify: new Vuetify(),    
 
     data: () => ({
-      
+       visible: false,
+       show1: false,
+        password: '',
+        contraseña:'',
+        mostrarBoton:false,
+        correoUsuario: null,
+        correo:'',
+        abc: 'disabled',
+       // isButtonDisabled: true,
+        rules: {
+          required: value => !!value || 'Required.',
+          min: v => v.length >= 8 || 'Min 8 characters',
+          emailMatch: () => ('The email and password you entered don\'t match'),
+       
+        },
     
       dialog: false,
       search: '',
@@ -221,11 +315,11 @@
       desserts: [],
       editedIndex: -1,
       editedItem: {
-        name: '',
+   /*      name: '',
         calories: 0,
         fat: 0,
         carbs: 0,
-        protein: 0,
+        protein: 0, */
       },
       defaultItem: {
         name: '',
@@ -240,6 +334,10 @@
      formTitle () {
         return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
       },
+      botosEsVisible(){
+        //cambia el estado del boton si paswword es menor que 8
+        return this.password.length < 8
+      }
     },
 
     watch: {
@@ -248,16 +346,58 @@
       },
     },
 
-    created () {
-      this.initialize()
+  created () {
+    console.log(this.visible) //<= aqui el resultado es False 
+      firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+          // User is signed in.
+          console.log('Existe usuario Activo')   
+         this.visible=true 
+        } else {
+          // User is signed out.
+          console.log('No se ha iniciado sesion.')
+          this.visible=false 
+          
+          // ...
+        }
+      });         
+    this.initialize()     
     },
 
     methods: {
       initialize () {
-        this.desserts = pacientes
-                   
+       this.desserts = pacientes
+        
       },
 
+
+    ingresoSistema(){
+        this.correo= this.correoUsuario
+        this.contraseña = this.password
+        console.log(this.correo);
+        console.log(this.contraseña); 
+        firebase.auth().signInWithEmailAndPassword(this.correoUsuario, this.password).catch(function(error) {
+          
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // ...
+        console.log(errorCode);
+        console.log(errorMessage);
+      });
+    },
+
+    cerrarSesion(){
+        firebase.auth().signOut()
+        .then(function(){
+        
+            console.log('Cerrando Sesion...')
+          })
+        .catch(function(error){
+            console.log(error)
+
+          })
+    },
       editItem (item) {
         this.editedIndex = this.desserts.indexOf(item)
         console.log(item)
