@@ -49,7 +49,7 @@
                   <v-text-field      
                   name="username"
                   label="username"
-                  hint="At least 8 characters"
+                  
                   value=""
                   v-model="correoUsuario"   
                 >
@@ -76,21 +76,14 @@
                 text
                 color="deep-purple accent-4"
                 @click="ingresoSistema"
-                :disabled="botosEsVisible"
-               
+                :disabled="botonEsVisible"
               >
-                Ingreso
+                Ingresar
               </v-btn>
-             
-            </v-card-actions>
-           
-
+            </v-card-actions>      
           </v-card>
         </template>
         <template v-if="visible">
-         
-          
-        
           <v-data-table
             :headers="headers"
             :items="desserts"
@@ -100,22 +93,7 @@
 
           >
             <template v-slot:top>
-              <!-- <div>
-                <v-toolbar
-                  dark
-                  src="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg"
-                >
-                  <v-app-bar-nav-icon></v-app-bar-nav-icon>
-            
-                  <v-toolbar-title>As Limon</v-toolbar-title>
-            
-                  <v-spacer></v-spacer>
-            
-                  <v-btn icon>
-                    <v-icon>mdi-export</v-icon>
-                  </v-btn>
-                </v-toolbar>
-              </div> -->
+           
               <v-toolbar flat color="white">
                 <v-toolbar-title>My CRUD</v-toolbar-title>
                 <v-divider
@@ -152,15 +130,32 @@
                     <v-card-text>
                       <v-container>
                         <v-row>
+                          
+                    
+
                           <v-col cols="12" sm="6" md="4">
-                            <v-text-field v-model="editedItem.cedula" label="Cedula"></v-text-field>
+                            <!-- <v-text-field v-model="editedItem.ebais" label="Ebais"></v-text-field> -->
+                            <v-select
+                            v-model="select"
+                            :hint="`${select.state}, ${select.abbr}`"
+                            :items="items"
+                            item-text="state"
+                            item-value="abbr"
+                            label="Select"
+                            persistent-hint
+                            return-object
+                            single-line
+                          ></v-select>
+                            
                           </v-col>
                           <v-col cols="12" sm="6" md="4">
+                            <v-text-field v-model="editedItem.cedula" label="Indentificacion"  :counter="`${select.minimo}`"  ></v-text-field>
+                          </v-col>
+                          <v-col cols="12" sm="12" md="12">
                             <v-text-field v-model="editedItem.nombre" label="Nombre"></v-text-field>
+                            
                           </v-col>
-                          <v-col cols="12" sm="6" md="4">
-                            <v-text-field v-model="editedItem.ebais" label="Ebais"></v-text-field>
-                          </v-col>
+                        
                           <v-col cols="12" sm="6" md="4">
                             <v-text-field v-model="editedItem.telefono" label="Telefono"></v-text-field>
                           </v-col>
@@ -170,6 +165,7 @@
                           <v-col cols="12" sm="12" md="12">
                             <v-text-field v-model="editedItem.direccion" label="Direccion"></v-text-field>
                           </v-col>
+                      
                         </v-row>
                       </v-container>
                     </v-card-text>
@@ -177,7 +173,7 @@
                     <v-card-actions>
                       <v-spacer></v-spacer>
                       <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
-                      <v-btn color="blue darken-1" text @click="save">Save</v-btn>
+                      <v-btn color="blue darken-1" text @click="save" :disabled="botonGuardarVisible">Save</v-btn>
                     </v-card-actions>
                   </v-card>
                 </v-dialog>
@@ -252,8 +248,9 @@
             console.log(pacientes.length)    
             querySnapshot.forEach((doc) => {         
             var fechaRegistro = new Date( doc.data().Fecha.seconds *1000).toLocaleString();
+               
                 pacientes.push({
-                      tipoid: doc.Tipo,
+                      tipoid: doc.data().TipoID, 
                       varid: doc.id, 
                       cedula: doc.data().Cedula, 
                       nombre: doc.data().Nombre,
@@ -264,26 +261,36 @@
                       direccion: doc.data().Direccion,
                       
                     });
-                   
+                
               });
               console.log(querySnapshot.size);       
                           
           });
     
 
-
-
-
       const cm = new Vue({
       el: '#app',
       vuetify: new Vuetify(),    
 
     data: () => ({
+
+      //botonGuardarVisible : true,
+      
+
+        select: { state: '', abbr: null},
+        items: [
+          { state: 'Nacional', abbr: '0', minimo: 9 },
+          { state: 'Interno', abbr: '6', minimo: 12 },
+          { state: 'Extranjero', abbr: '7', minimo: 10 },
+    
+        ],
+      
+
        visible: false,
        show1: false,
         password: '',
         contraseña:'',
-        mostrarBoton:false,
+        //mostrarBoton:false,
         correoUsuario: null,
         correo:'',
         abc: 'disabled',
@@ -294,7 +301,7 @@
           emailMatch: () => ('The email and password you entered don\'t match'),
        
         },
-    
+      
       dialog: false,
       search: '',
       headers: [
@@ -305,6 +312,7 @@
             value: 'cedula',
         },
        /*  { text: 'firebase', value: 'varid' }, */
+       { text: 'TP', value: 'tipoid' },
         { text: 'Nombre', value: 'nombre' },
           { text: 'Ebais', value: 'ebais' },
           { text: 'Telefono', value: 'telefono' },
@@ -315,16 +323,16 @@
       desserts: [],
       editedIndex: -1,
       editedItem: {
-   /*      name: '',
-        calories: 0,
-        fat: 0,
+        nombre: '',
+        cedula: '',
+        tipoid: '',
         carbs: 0,
-        protein: 0, */
+        protein: 0, 
       },
       defaultItem: {
-        name: '',
-        calories: 0,
-        fat: 0,
+        nombre: '',
+        cedula: '',
+        tipoid: '',
         carbs: 0,
         protein: 0,
       },
@@ -334,11 +342,16 @@
      formTitle () {
         return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
       },
-      botosEsVisible(){
+      botonEsVisible(){
         //cambia el estado del boton si paswword es menor que 8
         return this.password.length < 8
-      }
+      },
+      
+    botonGuardarVisible(){ 
+          return  this.editedItem.nombre.length < 3 || this.editedItem.cedula.length < 3 || this.select.abbr < 0 
+      },
     },
+
 
     watch: {
       dialog (val) {
@@ -352,6 +365,7 @@
         if (user) {
           // User is signed in.
           console.log('Existe usuario Activo')   
+          console.info(user.uid)
          this.visible=true 
         } else {
           // User is signed out.
@@ -434,7 +448,28 @@
         if (this.editedIndex > -1) {
           Object.assign(this.desserts[this.editedIndex], this.editedItem)
         } else {
-          this.desserts.push(this.editedItem)
+          this.desserts.push(this.editedItem.cedula)
+         console.log(this.editedItem.cedula)
+          db.collection("CopiasTelefono").add({
+              TipoID:this.select.abbr,
+             Cedula: this.editedItem.cedula,
+             Nombre: this.editedItem.nombre,
+             Fecha: firebase.firestore.Timestamp.fromDate(new Date()),
+          
+                
+    })
+    .then(function(docRef) {
+        console.log("Document written with ID: ", docRef.id);
+       
+        alert("Registro Almacenado Correctamente");
+
+    })
+    .catch(function(error) {
+        console.error("Error adding document: ", error);
+        alert(error);
+
+    });
+
         }
         this.close()
       },
