@@ -205,7 +205,7 @@
         
                     <v-card-actions>
                       <v-spacer></v-spacer>
-                        {{editedItem.varid}}
+                        {{editedItem.varid }} - 
                       <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
                       <v-btn color="blue darken-1" text @click="save" :disabled="botonGuardarVisible">Guardar</v-btn>
                     </v-card-actions>
@@ -356,7 +356,7 @@
         telefono: '',
         correo: '', 
         ebais:'', nombreEbais: '', codigoEbais:'',
-        state: '', tipo: '', minimo: 0
+        state: '',  minimo: 0
       },
       defaultItem: {
         nombre: '',
@@ -364,8 +364,8 @@
         tipoid: '',
         telefono: '',
         correo: '',
-        ebais:'',
-        state: '', tipo: '', minimo: 0
+        ebais:'', nombreEbais: '', codigoEbais:'',
+        state: '',  minimo: 0
       },
     }),
 
@@ -483,6 +483,7 @@
         console.log(item.varid)
         console.log(item.cedula)
         
+        
         this.editedItem = Object.assign({}, item)
         this.dialog = true
       },
@@ -517,7 +518,7 @@
           Object.assign(this.desserts[this.editedIndex], this.editedItem)
             console.log(this.editedItem)
             console.log(this.editedItem.varid)
-          
+             
             id=this.editedItem.varid
             console.log(id)
 
@@ -525,18 +526,24 @@
           var washingtonRef = db.collection(coleccion).doc(id);
           return washingtonRef.update({
 
-              TipoID:this.editedItem.tipoid,
+            TipoID: this.editedItem.tipoid,
               Cedula:this.editedItem.cedula,
               Nombre: this.editedItem.nombre,
-              Ebais: this.editedItem.ebais.codigoEbais,
-              Correo: this.editedItem.correo,
               Telefono: this.editedItem.telefono,
+              Correo: this.editedItem.correo,
+              Ebais: this.editedItem.ebais,
+              Direccion: this.editedItem.direccion,
+              //Fecha: firebase.firestore.Timestamp.fromDate(new Date()),
+        
 
               
               //Fecha: firebase.firestore.Timestamp.fromDate(new Date()),
             })
             .then(function() {
-                alert("Document successfully updated!");
+              console.log(this.dialog)
+              this.dialog = false
+              console.log(this.dialog)
+                alert("Documento fue ---  successfully updated!");
                 
                 
               })
@@ -550,14 +557,15 @@
 
           ///NUEVO REGISTRO
           this.desserts.push(this.editedItem.cedula)
-         console.log(this.editedItem.cedula)
-         console.log(this.ebaisAdcripcion.codigo,)
+       
           db.collection(coleccion).add({
-            TipoID:this.select.tipo,
+             TipoID: this.editedItem.tipoid.tipo,
              Cedula: this.editedItem.cedula,
              Nombre: this.editedItem.nombre,
-             
+             Telefono: this.editedItem.telefono,
+             Correo: this.editedItem.correo,
              Ebais: this.editedItem.ebais.codigoEbais,
+             Direccion: this.editedItem.direccion,
              Fecha: firebase.firestore.Timestamp.fromDate(new Date()),
           
                 
