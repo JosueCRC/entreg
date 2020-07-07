@@ -56,6 +56,7 @@
               </v-text-field>
                 
                   <v-text-field
+                    id="eligeEbais"
                     v-model="password"
                     :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
                     :rules="[rules.required, rules.min]"
@@ -66,11 +67,29 @@
                     counter
                     @click:append="show1 = !show1"
                   ></v-text-field>
+                  <v-col cols="12"></v-col>
+                  <v-select
+                  v-model="elegirEbais"
+                  :hint="`${elegirEbais.ebais}, ${elegirEbais.codigo}`"
+                  :items="itemsEbais"
+                  item-text="ebais"
+                  item-value="codigo"
+                  label="Elegir Ebais"
+                  persistent-hint
+                  return-object
+                  single-line
+                ></v-select>
+                </v-col>
                 
                 </v-col>
               </p>
+        
+            
+                 
+                
             
             </v-card-text>
+            
             <v-card-actions>
               <v-btn
                 text
@@ -95,7 +114,7 @@
             <template v-slot:top>
            
               <v-toolbar flat color="white">
-                <v-toolbar-title>My CRUD</v-toolbar-title>
+                <v-toolbar-title>Registro Entregas Domicilio</v-toolbar-title>
                 <v-divider
                   class="mx-4"
                   inset
@@ -136,11 +155,11 @@
                           <v-col cols="12" sm="6" md="4">
                             <!-- <v-text-field v-model="editedItem.ebais" label="Ebais"></v-text-field> -->
                             <v-select
-                            v-model="select"
-                            :hint="`${select.state}, ${select.abbr}`"
+                            v-model="editedItem.tipoid"
+                            :hint="`${editedItem.tipoid.state}, ${editedItem.tipoid.tipo}`"
                             :items="items"
                             item-text="state"
-                            item-value="abbr"
+                            item-value="tipo"
                             label="Select"
                             persistent-hint
                             return-object
@@ -149,7 +168,7 @@
                             
                           </v-col>
                           <v-col cols="12" sm="6" md="4">
-                            <v-text-field v-model="editedItem.cedula" label="Indentificacion"  :counter="`${select.minimo}`"  ></v-text-field>
+                            <v-text-field v-model="editedItem.cedula" label="Indentificacion"  :counter="`${editedItem.tipoid.minimo}`"  ></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="12" md="12">
                             <v-text-field v-model="editedItem.nombre" label="Nombre"></v-text-field>
@@ -162,6 +181,20 @@
                           <v-col cols="12" sm="6" md="4">
                             <v-text-field v-model="editedItem.correo" label="Correo"></v-text-field>
                           </v-col>
+
+                          <v-col cols="12" sm="12" md="12">
+                            <v-select
+                              v-model="editedItem.ebais"
+                              :hint="`${editedItem.ebais.nombreEbais}, ${editedItem.ebais.codigoEbais}`"
+                              :items="itemsEbaisAdscripcion"
+                              item-text="nombreEbais"
+                              item-value="codigoEbais"
+                              label="Seleccione un Ebais"
+                              persistent-hint
+                              return-object
+                              single-line
+                            ></v-select>
+
                           <v-col cols="12" sm="12" md="12">
                             <v-text-field v-model="editedItem.direccion" label="Direccion"></v-text-field>
                           </v-col>
@@ -172,8 +205,9 @@
         
                     <v-card-actions>
                       <v-spacer></v-spacer>
+                        {{editedItem.varid}}
                       <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
-                      <v-btn color="blue darken-1" text @click="save" :disabled="botonGuardarVisible">Save</v-btn>
+                      <v-btn color="blue darken-1" text @click="save" :disabled="botonGuardarVisible">Guardar</v-btn>
                     </v-card-actions>
                   </v-card>
                 </v-dialog>
@@ -242,30 +276,6 @@
   pacientes= []
 
 
-  //Leer documentos.
-  db.collection("CopiasTelefono").orderBy("Fecha", "desc").onSnapshot((querySnapshot) => {
-            pacientes.length = 0;
-            console.log(pacientes.length)    
-            querySnapshot.forEach((doc) => {         
-            var fechaRegistro = new Date( doc.data().Fecha.seconds *1000).toLocaleString();
-               
-                pacientes.push({
-                      tipoid: doc.data().TipoID, 
-                      varid: doc.id, 
-                      cedula: doc.data().Cedula, 
-                      nombre: doc.data().Nombre,
-                      ebais: doc.data().Ebais,
-                      telefono: doc.data().Telefono,
-                      correo: doc.data().Correo,
-                      fecha: fechaRegistro,
-                      direccion: doc.data().Direccion,
-                      
-                    });
-                
-              });
-              console.log(querySnapshot.size);       
-                          
-          });
     
 
       const cm = new Vue({
@@ -275,17 +285,33 @@
     data: () => ({
 
       //botonGuardarVisible : true,
-      
+      elegirEbais: { ebais: '', codigo: '' },
+        itemsEbais: [
+          { ebais: 'Centro', codigo: '263220' },
+          { ebais: 'Pueblo', codigo: '263203' },
+          { ebais: 'AsL', codigo: '' },
+          { ebais: 'California', codigo: 'CA' },
+          { ebais: 'New York', codigo: 'NY' },
+        ],
 
-        select: { state: '', abbr: null},
+      select: { state: '', tipo: ''},
         items: [
-          { state: 'Nacional', abbr: '0', minimo: 9 },
-          { state: 'Interno', abbr: '6', minimo: 12 },
-          { state: 'Extranjero', abbr: '7', minimo: 10 },
+          { state: 'Nacional', tipo: '0', minimo: 9 },
+          { state: 'Interno', tipo: '6', minimo: 12 },
+          { state: 'Extranjero', tipo: '7', minimo: 10 },
     
         ],
-      
 
+    ebaisAdcripcion: { nombreEbais: '', codigoEbais: '' },
+        itemsEbaisAdscripcion: [
+          { nombreEbais: 'Area Salud', codigoEbais: '2632' },
+          { nombreEbais: 'Pueblo Nuevo', codigoEbais: '263203' },
+          { nombreEbais: 'Corales', codigoEbais: '263204' },
+          { nombreEbais: 'Santa Eduviges', codigoEbais: '263205' },
+          { nombreEbais: 'Cristobal Colon', codigoEbais: '263206' },
+        ],
+      
+      
        visible: false,
        show1: false,
         password: '',
@@ -305,18 +331,19 @@
       dialog: false,
       search: '',
       headers: [
+      { text: 'TP', value: 'tipoid' },
         {
-          text: 'Id',
+          text: 'Identficacion',
             align: 'start',
-            sortable: false,
+            sortable: true,
             value: 'cedula',
         },
        /*  { text: 'firebase', value: 'varid' }, */
-       { text: 'TP', value: 'tipoid' },
+   
         { text: 'Nombre', value: 'nombre' },
           { text: 'Ebais', value: 'ebais' },
           { text: 'Telefono', value: 'telefono' },
-        /*   { text: 'Correo', value: 'correo' }, */
+          { text: 'Correo', value: 'correo' }, 
           { text: 'Fecha', value: 'fecha' },
         { text: 'Actions', value: 'actions', sortable: false },
       ],
@@ -326,15 +353,19 @@
         nombre: '',
         cedula: '',
         tipoid: '',
-        carbs: 0,
-        protein: 0, 
+        telefono: '',
+        correo: '', 
+        ebais:'', nombreEbais: '', codigoEbais:'',
+        state: '', tipo: '', minimo: 0
       },
       defaultItem: {
         nombre: '',
         cedula: '',
         tipoid: '',
-        carbs: 0,
-        protein: 0,
+        telefono: '',
+        correo: '',
+        ebais:'',
+        state: '', tipo: '', minimo: 0
       },
     }),
 
@@ -348,7 +379,7 @@
       },
       
     botonGuardarVisible(){ 
-          return  this.editedItem.nombre.length < 3 || this.editedItem.cedula.length < 3 || this.select.abbr < 0 
+          return  this.editedItem.nombre == '' || this.editedItem.cedula == '' || this.editedItem.tipoid == ''  || this.editedItem.telefono == '' || this.ebaisAdcripcion.codigo == '' 
       },
     },
 
@@ -367,6 +398,36 @@
           console.log('Existe usuario Activo')   
           console.info(user.uid)
          this.visible=true 
+
+             //Leer documentos.
+             coleccion= ('CopiasTelefono' + this.elegirEbais.codigo)
+            console.log('coleccion es>>>: '+ coleccion)
+            db.collection(coleccion).orderBy("Fecha", "desc").onSnapshot((querySnapshot) => {
+                      pacientes.length = 0;
+                      console.log(pacientes.length)    
+                      querySnapshot.forEach((doc) => {         
+                      var fechaRegistro = new Date( doc.data().Fecha.seconds *1000).toLocaleString();
+                        
+                          pacientes.push({
+                                tipoid: doc.data().TipoID, 
+                                varid: doc.id, 
+                                cedula: doc.data().Cedula, 
+                                nombre: doc.data().Nombre,
+                                ebais: doc.data().Ebais,
+                                telefono: doc.data().Telefono,
+                                correo: doc.data().Correo,
+                                fecha: fechaRegistro,
+                                direccion: doc.data().Direccion,
+                                
+                              });
+                          
+                        });
+                        console.log(querySnapshot.size);       
+                                    
+                    });
+
+
+
         } else {
           // User is signed out.
           console.log('No se ha iniciado sesion.')
@@ -380,6 +441,9 @@
 
     methods: {
       initialize () {
+
+         
+
        this.desserts = pacientes
         
       },
@@ -404,7 +468,8 @@
     cerrarSesion(){
         firebase.auth().signOut()
         .then(function(){
-        
+            this.elegirEbais.codigo= null,
+            this.desserts = []
             console.log('Cerrando Sesion...')
           })
         .catch(function(error){
@@ -414,7 +479,10 @@
     },
       editItem (item) {
         this.editedIndex = this.desserts.indexOf(item)
-        console.log(item)
+        console.log( this.editedIndex)
+        console.log(item.varid)
+        console.log(item.cedula)
+        
         this.editedItem = Object.assign({}, item)
         this.dialog = true
       },
@@ -427,7 +495,7 @@
         id=item.varid
         console.log('el id es: '+id)
 
-        db.collection("CopiasTelefono").doc(id).delete().then(function() {
+        db.collection(coleccion).doc(id).delete().then(function() {
         console.log("Document successfully deleted!");
           }).catch(function(error) {
               console.error("Error removing document: ", error);
@@ -444,16 +512,52 @@
         })
       },
 
-      save () {
+      save (item,cedula) {
         if (this.editedIndex > -1) {
           Object.assign(this.desserts[this.editedIndex], this.editedItem)
+            console.log(this.editedItem)
+            console.log(this.editedItem.varid)
+          
+            id=this.editedItem.varid
+            console.log(id)
+
+            //EDITAR REGISTRO
+          var washingtonRef = db.collection(coleccion).doc(id);
+          return washingtonRef.update({
+
+              TipoID:this.editedItem.tipoid,
+              Cedula:this.editedItem.cedula,
+              Nombre: this.editedItem.nombre,
+              Ebais: this.editedItem.ebais.codigoEbais,
+              Correo: this.editedItem.correo,
+              Telefono: this.editedItem.telefono,
+
+              
+              //Fecha: firebase.firestore.Timestamp.fromDate(new Date()),
+            })
+            .then(function() {
+                alert("Document successfully updated!");
+                
+                
+              })
+            .catch(function(error) {
+                // The document probably doesn't exist.
+                console.error("Error updating document: ", error);
+            });
+    
+          ////********
         } else {
+
+          ///NUEVO REGISTRO
           this.desserts.push(this.editedItem.cedula)
          console.log(this.editedItem.cedula)
-          db.collection("CopiasTelefono").add({
-              TipoID:this.select.abbr,
+         console.log(this.ebaisAdcripcion.codigo,)
+          db.collection(coleccion).add({
+            TipoID:this.select.tipo,
              Cedula: this.editedItem.cedula,
              Nombre: this.editedItem.nombre,
+             
+             Ebais: this.editedItem.ebais.codigoEbais,
              Fecha: firebase.firestore.Timestamp.fromDate(new Date()),
           
                 
