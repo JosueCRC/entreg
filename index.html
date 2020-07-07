@@ -206,7 +206,7 @@
                     <v-card-actions>
                       <v-spacer></v-spacer>
                         {{editedItem.varid }} - 
-                      <v-btn color="blue darken-1" text @click="close">Cancel</v-btn>
+                      <v-btn color="blue darken-1" text @click="close">Cerrar</v-btn>
                       <v-btn color="blue darken-1" text @click="save" :disabled="botonGuardarVisible">Guardar</v-btn>
                     </v-card-actions>
                   </v-card>
@@ -305,6 +305,8 @@
     ebaisAdcripcion: { nombreEbais: '', codigoEbais: '' },
         itemsEbaisAdscripcion: [
           { nombreEbais: 'Area Salud', codigoEbais: '2632' },
+          { nombreEbais: 'COCOS', codigoEbais: '263201' },
+          { nombreEbais: 'COLINA', codigoEbais: '263202' },
           { nombreEbais: 'Pueblo Nuevo', codigoEbais: '263203' },
           { nombreEbais: 'Corales', codigoEbais: '263204' },
           { nombreEbais: 'Santa Eduviges', codigoEbais: '263205' },
@@ -331,7 +333,7 @@
       dialog: false,
       search: '',
       headers: [
-      { text: 'TP', value: 'tipoid' },
+      { text: 'TP', value: 'tipoid.tipo' },
         {
           text: 'Identficacion',
             align: 'start',
@@ -341,7 +343,7 @@
        /*  { text: 'firebase', value: 'varid' }, */
    
         { text: 'Nombre', value: 'nombre' },
-          { text: 'Ebais', value: 'ebais' },
+          { text: 'Ebais', value: 'ebais.codigoEbais' },
           { text: 'Telefono', value: 'telefono' },
           { text: 'Correo', value: 'correo' }, 
           { text: 'Fecha', value: 'fecha' },
@@ -379,7 +381,7 @@
       },
       
     botonGuardarVisible(){ 
-          return  this.editedItem.nombre == '' || this.editedItem.cedula == '' || this.editedItem.tipoid == ''  || this.editedItem.telefono == '' || this.ebaisAdcripcion.codigo == '' 
+          return  this.editedItem.nombre == '' || this.editedItem.cedula == '' || this.editedItem.tipoid == ''  || this.editedItem.telefono == '' || this.editedItem.ebais == '' || this.editedItem.direccion == ''
       },
     },
 
@@ -482,8 +484,7 @@
         console.log( this.editedIndex)
         console.log(item.varid)
         console.log(item.cedula)
-        
-        
+  
         this.editedItem = Object.assign({}, item)
         this.dialog = true
       },
@@ -559,12 +560,12 @@
           this.desserts.push(this.editedItem.cedula)
        
           db.collection(coleccion).add({
-             TipoID: this.editedItem.tipoid.tipo,
+             TipoID: this.editedItem.tipoid,
              Cedula: this.editedItem.cedula,
              Nombre: this.editedItem.nombre,
              Telefono: this.editedItem.telefono,
              Correo: this.editedItem.correo,
-             Ebais: this.editedItem.ebais.codigoEbais,
+             Ebais: this.editedItem.ebais,
              Direccion: this.editedItem.direccion,
              Fecha: firebase.firestore.Timestamp.fromDate(new Date()),
           
