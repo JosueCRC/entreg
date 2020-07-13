@@ -8,54 +8,48 @@
   <script src="https://www.gstatic.com/firebasejs/7.15.1/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.15.2/firebase-firestore.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.14.5/firebase-auth.js"></script>
-
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons"rel="stylesheet">
 </head>
 <body>
   <div id="app">
     <v-app>
       <v-main>
-
-
         <template>
           <div>
-            <v-toolbar
-              dark
-              src="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg"
-            >
+            <v-toolbar dark src="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg" >
               <v-app-bar-nav-icon></v-app-bar-nav-icon>
-        
               <v-toolbar-title>As Limon</v-toolbar-title>
-        
               <v-spacer></v-spacer>
-        
-              <v-btn icon  @click="cerrarSesion">
-                <v-icon>mdi-export</v-icon>
-
-              </v-btn>
+              <v-btn icon @click="cerrarSesion"><v-icon>mdi-export</v-icon></v-btn>
             </v-toolbar>
           </div>
-
-          <v-card
-          
-            class="mx-auto mt-10"
-            max-width="400"
-            v-if="!visible"
-          >
+          <v-card class="mx-auto mt-10" max-width="400"v-if="!visible" >
             <v-card-text>
               <h1>Inicio de Sesion</h1>
               <p class="display-1 text--primary">
                 <v-col cols="12" >
                   <v-text-field      
                   name="username"
-                  label="username"
-                  
+                  label="username"       
                   value=""
-                  v-model="correoUsuario"   
-                >
-              </v-text-field>
-                
+                  v-model="correoUsuario"
+                  v-on:keyup.enter="validarExisteUsuario"   
+                  ></v-text-field>  
+
+                      <v-select
+                      v-model="ebaisAutorizados"
+                      :hint="`${ebaisAutorizados.nombre}`"
+                      :items="listaEbaisAutorizados"
+                      item-text="nombre"      
+                      label="Establecimiento de Salud"
+                      persistent-hint
+                      return-object
+                      single-line
+                    ></v-select>
+
+
                   <v-text-field
+                  v-if="!contraseñasVisible"
                     id="eligeEbais"
                     v-model="password"
                     :append-icon="show1 ? 'mdi-eye' : 'mdi-eye-off'"
@@ -67,37 +61,31 @@
                     counter
                     @click:append="show1 = !show1"
                   ></v-text-field>
+
                   <v-col cols="12"></v-col>
-                  <v-select
-                  v-model="elegirEbais"
-                  :hint="`${elegirEbais.ebais}, ${elegirEbais.codigo}`"
-                  :items="itemsEbais"
-                  item-text="ebais"
-                  item-value="codigo"
-                  label="Elegir Ebais"
-                  persistent-hint
-                  return-object
-                  single-line
-                ></v-select>
-                </v-col>
+             <!--      <v-select
+                    v-model="elegirEbais"
+                    :hint="`${elegirEbais.ebais}, ${elegirEbais.codigo}`"
+                    :items="itemsEbais"
+                    item-text="ebais"
+                    item-value="codigo"
+                    label="Elegir Ebais"
+                    persistent-hint
+                    return-object
+                    single-line
+                  ></v-select> -->
                 
                 </v-col>
+               <!--  </v-col> -->
               </p>
-        
-            
-                 
-                
-            
             </v-card-text>
-            
             <v-card-actions>
               <v-btn
                 text
                 color="deep-purple accent-4"
                 @click="ingresoSistema"
                 :disabled="botonEsVisible"
-              >
-                Ingresar
+              >Ingresar
               </v-btn>
             </v-card-actions>      
           </v-card>
@@ -109,10 +97,8 @@
             :search="search"
             sort-by="calories"
             class="elevation-1"
-
           >
             <template v-slot:top>
-           
               <v-toolbar flat color="white">
                 <v-toolbar-title>Registro Entregas Domicilio</v-toolbar-title>
                 <v-divider
@@ -128,7 +114,6 @@
                 hide-details
                 >
                 </v-text-field>
-              
                 <v-spacer></v-spacer>
                 <v-dialog v-model="dialog" max-width="700px">
                   <template v-slot:activator="{ on, attrs }">
@@ -139,49 +124,40 @@
                       v-bind="attrs"
                       v-on="on"
                     >New Item</v-btn>
-               
                   </template>
                   <v-card>
                     <v-card-title>
                       <span class="headline">{{ formTitle }}</span>
                     </v-card-title>
-        
                     <v-card-text>
                       <v-container>
                         <v-row>
-                          
-                    
-
                           <v-col cols="12" sm="6" md="4">
                             <!-- <v-text-field v-model="editedItem.ebais" label="Ebais"></v-text-field> -->
                             <v-select
-                            v-model="editedItem.tipoid"
-                            :hint="`${editedItem.tipoid.state}, ${editedItem.tipoid.tipo}`"
-                            :items="items"
-                            item-text="state"
-                            item-value="tipo"
-                            label="Select"
-                            persistent-hint
-                            return-object
-                            single-line
-                          ></v-select>
-                            
+                              v-model="editedItem.tipoid"
+                              :hint="`${editedItem.tipoid.state}, ${editedItem.tipoid.tipo}`"
+                              :items="items"
+                              item-text="state"
+                              item-value="tipo"
+                              label="Select"
+                              persistent-hint
+                              return-object
+                              single-line
+                            ></v-select>
                           </v-col>
                           <v-col cols="12" sm="6" md="4">
                             <v-text-field v-model="editedItem.cedula" label="Indentificacion"  :counter="`${editedItem.tipoid.minimo}`"  ></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="12" md="12">
                             <v-text-field v-model="editedItem.nombre" label="Nombre"></v-text-field>
-                            
                           </v-col>
-                        
                           <v-col cols="12" sm="6" md="4">
                             <v-text-field v-model="editedItem.telefono" label="Telefono"></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="6" md="4">
                             <v-text-field v-model="editedItem.correo" label="Correo"></v-text-field>
                           </v-col>
-
                           <v-col cols="12" sm="12" md="12">
                             <v-select
                               v-model="editedItem.ebais"
@@ -194,15 +170,12 @@
                               return-object
                               single-line
                             ></v-select>
-
                           <v-col cols="12" sm="12" md="12">
                             <v-text-field v-model="editedItem.direccion" label="Direccion"></v-text-field>
                           </v-col>
-                      
                         </v-row>
                       </v-container>
                     </v-card-text>
-        
                     <v-card-actions>
                       <v-spacer></v-spacer>
                         {{editedItem.varid }} - 
@@ -212,54 +185,23 @@
                   </v-card>
                 </v-dialog>
               </v-toolbar>
-              
-               <!--  <v-footer
-                  absolute
-                  class="font-weight-medium"
-                >
-                  <v-col
-                    class="text-center"
-                    cols="12"
-                  >
-                  Copyright © 2019-{{ new Date().getFullYear() }}
-                     — <strong>Josue Gonzalez</strong>
-                  </v-col>
-                </v-footer> -->
-
             </template>
-            
             <template v-slot:item.actions="{ item }">
-              <v-icon
-                small
-                class="mr-2"
-                @click="editItem(item)"
-              >
-                mdi-pencil
-              </v-icon>
-              <v-icon
-                small
-                @click="deleteItem(item)"
-              >
-                mdi-delete
-              </v-icon>
+              <v-icon small  class="mr-2"  @click="editItem(item)">mdi-pencil</v-icon>
+              <v-icon small  @click="deleteItem(item)"> mdi-delete</v-icon>
             </template>
             <template v-slot:no-data>
               <v-btn color="primary" @click="initialize">Reset</v-btn>
-           
             </template>
           </v-data-table>
         </template>
       </v-main>
     </v-app>
   </div>
- 
-
   <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
-
   <script>
-
-// Setup Firebase
+  // Setup Firebase
   // Your web app's Firebase configuration
   var firebaseConfig = {
     apiKey: "AIzaSyC74QNWfrpQ_dlAxU9fkSGYL-qDgYxiHn4",
@@ -274,34 +216,28 @@
   firebase.initializeApp(firebaseConfig);
   var db = firebase.firestore();
   pacientes= []
-
-
-    
-
+  miarray=[]
+  console.log(miarray)
+  arregloEbaisAutorizados = []
       const cm = new Vue({
       el: '#app',
       vuetify: new Vuetify(),    
-
     data: () => ({
-
-      //botonGuardarVisible : true,
-      elegirEbais: { ebais: '', codigo: '' },
+      /*elegirEbais: { ebais: '', codigo: '' },
         itemsEbais: [
           { ebais: 'Centro', codigo: '263220' },
           { ebais: 'Pueblo', codigo: '263203' },
           { ebais: 'AsL', codigo: '' },
-          { ebais: 'California', codigo: 'CA' },
-          { ebais: 'New York', codigo: 'NY' },
-        ],
+        ],*/
+        /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
+        /* permite elegir si el tipo de Identficacion del paciente */
+        /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
+        select: { state: '', tipo: ''},
+        items: [ { state: 'Nacional', tipo: '0', minimo: 9 }, { state: 'Interno', tipo: '6', minimo: 12 },  { state: 'Extranjero', tipo: '7', minimo: 10 },],
 
-      select: { state: '', tipo: ''},
-        items: [
-          { state: 'Nacional', tipo: '0', minimo: 9 },
-          { state: 'Interno', tipo: '6', minimo: 12 },
-          { state: 'Extranjero', tipo: '7', minimo: 10 },
-    
-        ],
-
+        /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-/
+        /* permite seleccionar el ebais de adscripcion para guardar en FB */
+        /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
     ebaisAdcripcion: { nombreEbais: '', codigoEbais: '' },
         itemsEbaisAdscripcion: [
           { nombreEbais: 'Area Salud', codigoEbais: '2632' },
@@ -313,8 +249,10 @@
           { nombreEbais: 'Cristobal Colon', codigoEbais: '263206' },
         ],
       
-      
-       visible: false,
+        visible: false,
+
+        ebaisAutorizados: { nombre: ''},
+        listaEbaisAutorizados: [],
        show1: false,
         password: '',
         contraseña:'',
@@ -327,9 +265,7 @@
           required: value => !!value || 'Required.',
           min: v => v.length >= 8 || 'Min 8 characters',
           emailMatch: () => ('The email and password you entered don\'t match'),
-       
         },
-      
       dialog: false,
       search: '',
       headers: [
@@ -383,33 +319,31 @@
     botonGuardarVisible(){ 
           return  this.editedItem.nombre == '' || this.editedItem.cedula == '' || this.editedItem.tipoid == ''  || this.editedItem.telefono == '' || this.editedItem.ebais == '' || this.editedItem.direccion == ''
       },
+    contraseñasVisible(){
+        return this.ebaisAutorizados.nombre == ''
+    }
+
     },
-
-
     watch: {
       dialog (val) {
         val || this.close()
       },
     },
-
   created () {
-    console.log(this.visible) //<= aqui el resultado es False 
       firebase.auth().onAuthStateChanged((user) => {
         if (user) {
           // User is signed in.
           console.log('Existe usuario Activo')   
           console.info(user.uid)
-         this.visible=true 
-
-             //Leer documentos.
-             coleccion= ('CopiasTelefono' + this.elegirEbais.codigo)
-            console.log('coleccion es>>>: '+ coleccion)
+          this.visible=true 
+              ///////////////////////////////
+             //Leer documentos en Fire Base//
+             ///////////////////////////////
+            coleccion= ('CopiasTelefono' + this.elegirEbais.codigo)    
             db.collection(coleccion).orderBy("Fecha", "desc").onSnapshot((querySnapshot) => {
                       pacientes.length = 0;
-                      console.log(pacientes.length)    
                       querySnapshot.forEach((doc) => {         
-                      var fechaRegistro = new Date( doc.data().Fecha.seconds *1000).toLocaleString();
-                        
+                      var fechaRegistro = new Date( doc.data().Fecha.seconds *1000).toLocaleString();   
                           pacientes.push({
                                 tipoid: doc.data().TipoID, 
                                 varid: doc.id, 
@@ -419,23 +353,15 @@
                                 telefono: doc.data().Telefono,
                                 correo: doc.data().Correo,
                                 fecha: fechaRegistro,
-                                direccion: doc.data().Direccion,
-                                
-                              });
-                          
+                                direccion: doc.data().Direccion,          
+                              });    
                         });
-                        console.log(querySnapshot.size);       
-                                    
+                        console.log(querySnapshot.size);                                         
                     });
-
-
-
         } else {
           // User is signed out.
           console.log('No se ha iniciado sesion.')
           this.visible=false 
-          
-          // ...
         }
       });         
     this.initialize()     
@@ -443,42 +369,64 @@
 
     methods: {
       initialize () {
-
-         
-
+       this.desserts = []
        this.desserts = pacientes
-        
       },
 
+      validarExisteUsuario(){
+        console.log('presiona enter')
+        console.log(this.correoUsuario)
+            db.collection("perfilesUsuario").where("correo", "==", this.correoUsuario).onSnapshot((querySnapshot) => {   
+                 querySnapshot.forEach((doc) => {                              
+                    console.log(`${doc.data().Autorizado.length}`);
+                      miarray=[]
+                    var miObjeto = doc.data().Autorizado
+                           miObjeto.forEach(function(item) {
+                             miarray.push({nombre: item})
+                          })
+
+                               this.update()
+                        });                                      
+                    })
+
+      },
+
+      update(){
+           console.log(miarray)
+          this.listaEbaisAutorizados = miarray
+      },
 
     ingresoSistema(){
         this.correo= this.correoUsuario
         this.contraseña = this.password
         console.log(this.correo);
         console.log(this.contraseña); 
-        firebase.auth().signInWithEmailAndPassword(this.correoUsuario, this.password).catch(function(error) {
-          
+        firebase.auth().signInWithEmailAndPassword(this.correoUsuario, this.password).catch(function(error) { 
         // Handle Errors here.
         var errorCode = error.code;
         var errorMessage = error.message;
         // ...
         console.log(errorCode);
         console.log(errorMessage);
+
+        alert (errorCode)
+        alert(errorMessage)
       });
     },
 
     cerrarSesion(){
         firebase.auth().signOut()
         .then(function(){
-            this.elegirEbais.codigo= null,
-            this.desserts = []
+            //this.elegirEbais.codigo = null,
             console.log('Cerrando Sesion...')
+            pacientes.length=0
+            
           })
         .catch(function(error){
             console.log(error)
-
           })
     },
+
       editItem (item) {
         this.editedIndex = this.desserts.indexOf(item)
         console.log( this.editedIndex)
@@ -493,17 +441,13 @@
         //const index = this.desserts.indexOf(item)
         console.log(item)
         //confirm('Are you sure you want to delete this item?') && this.desserts.splice(index, 1)
-
         id=item.varid
         console.log('el id es: '+id)
-
         db.collection(coleccion).doc(id).delete().then(function() {
         console.log("Document successfully deleted!");
           }).catch(function(error) {
               console.error("Error removing document: ", error);
           });
-
-
       },
 
       close () {
@@ -518,15 +462,16 @@
         if (this.editedIndex > -1) {
           Object.assign(this.desserts[this.editedIndex], this.editedItem)
             console.log(this.editedItem)
-            console.log(this.editedItem.varid)
-             
+            console.log(this.editedItem.varid)       
             id=this.editedItem.varid
             console.log(id)
 
-            //EDITAR REGISTRO
-          var washingtonRef = db.collection(coleccion).doc(id);
-          return washingtonRef.update({
+             //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*//
+             //EDITAR REGISTRO EXITENTE EN LA CODELCCION FIREBASE   // 
+             //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*//
 
+          var registroPacientes = db.collection(coleccion).doc(id);
+          return registroPacientes.update({
             TipoID: this.editedItem.tipoid,
               Cedula:this.editedItem.cedula,
               Nombre: this.editedItem.nombre,
@@ -534,31 +479,24 @@
               Correo: this.editedItem.correo,
               Ebais: this.editedItem.ebais,
               Direccion: this.editedItem.direccion,
-              //Fecha: firebase.firestore.Timestamp.fromDate(new Date()),
-        
-
-              
+              //Fecha: firebase.firestore.Timestamp.fromDate(new Date()),              
               //Fecha: firebase.firestore.Timestamp.fromDate(new Date()),
             })
             .then(function() {
               console.log(this.dialog)
               this.dialog = false
               console.log(this.dialog)
-                alert("Documento fue ---  successfully updated!");
-                
-                
+                alert("Documento fue ---  successfully updated!"); 
               })
             .catch(function(error) {
                 // The document probably doesn't exist.
                 console.error("Error updating document: ", error);
-            });
-    
-          ////********
+            });     
         } else {
-
-          ///NUEVO REGISTRO
+           //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-//
+           //GUARDAR UN NUEVO REGISTRO EN LA CODELCCION FIREBASE   // 
+           //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-//
           this.desserts.push(this.editedItem.cedula)
-       
           db.collection(coleccion).add({
              TipoID: this.editedItem.tipoid,
              Cedula: this.editedItem.cedula,
@@ -567,37 +505,27 @@
              Correo: this.editedItem.correo,
              Ebais: this.editedItem.ebais,
              Direccion: this.editedItem.direccion,
-             Fecha: firebase.firestore.Timestamp.fromDate(new Date()),
-          
-                
+             Fecha: firebase.firestore.Timestamp.fromDate(new Date()),         
     })
     .then(function(docRef) {
         console.log("Document written with ID: ", docRef.id);
-       
         alert("Registro Almacenado Correctamente");
-
-    })
+     })
     .catch(function(error) {
         console.error("Error adding document: ", error);
-        alert(error);
-
-    });
-
+        alert(error); 
+     });
         }
         this.close()
       },
+
+      destroyed(){
+        alert('sistema cerrado')
+      }
     },
-  
     })
   </script>
-<!-- The core Firebase JS SDK is always required and must be listed first -->
-
-
-<!-- TODO: Add SDKs for Firebase products that you want to use
-     https://firebase.google.com/docs/web/setup#available-libraries -->
-
 <script>
-
 </script>
 </body>
 </html>
