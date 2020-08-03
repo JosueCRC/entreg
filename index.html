@@ -9,6 +9,7 @@
   <script src="https://www.gstatic.com/firebasejs/7.15.2/firebase-firestore.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.14.5/firebase-auth.js"></script>
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons"rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
 </head>
 <body>
   <div id="app">
@@ -38,9 +39,10 @@
 
                       <v-select
                       v-model="ebaisAutorizados"
-                      :hint="`${ebaisAutorizados.nombre}`"
+                      :hint="`${ebaisAutorizados.Nombre}, ${ebaisAutorizados.Codigo}`"
                       :items="listaEbaisAutorizados"
-                      item-text="nombre"      
+                      item-text="Nombre"
+                      item-value="Codigo"      
                       label="Establecimiento de Salud"
                       persistent-hint
                       return-object
@@ -126,9 +128,36 @@
                     >New Item</v-btn>
                   </template>
                   <v-card>
-                    <v-card-title>
-                      <span class="headline">{{ formTitle }}</span>
-                    </v-card-title>
+
+                  			 <v-row>
+							      <v-col
+							       cols="7" >
+							      
+							          <v-card-title>
+					                      <span class="headline">{{ formTitle }}</span>
+					                    </v-card-title>
+							       
+							      </v-col>
+							      <v-col
+							       cols="5" >
+							      
+							      <v-btn	
+							      			v-if="btnImprimir"
+									      
+									      color="error"
+									      class="ma-2 white--text"
+									      @click= "exportPDF"
+									    >
+									      Imprimir
+									      <v-icon right dark>mdi-file-pdf</v-icon>
+									    </v-btn>
+							       
+							      </v-col>
+							    </v-row>
+
+
+                  
+                  
                     <v-card-text>
                       <v-container>
                         <v-row>
@@ -147,13 +176,13 @@
                             ></v-select>
                           </v-col>
                           <v-col cols="12" sm="6" md="4">
-                            <v-text-field v-model="editedItem.cedula" label="Indentificacion"  :counter="`${editedItem.tipoid.minimo}`"  ></v-text-field>
+                            <v-text-field v-model.number="editedItem.cedula"  label="Indentificacion"  :counter="`${editedItem.tipoid.minimo}`"  ></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="12" md="12">
                             <v-text-field v-model="editedItem.nombre" label="Nombre"></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="6" md="4">
-                            <v-text-field v-model="editedItem.telefono" label="Telefono"></v-text-field>
+                            <v-text-field v-model.number="editedItem.telefono" label="Telefono"></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="6" md="4">
                             <v-text-field v-model="editedItem.correo" label="Correo"></v-text-field>
@@ -170,7 +199,7 @@
                               return-object
                               single-line
                             ></v-select>
-                          <v-col cols="12" sm="12" md="12">
+                          
                             <v-text-field v-model="editedItem.direccion" label="Direccion"></v-text-field>
                           </v-col>
                         </v-row>
@@ -187,8 +216,9 @@
               </v-toolbar>
             </template>
             <template v-slot:item.actions="{ item }">
-              <v-icon small  class="mr-2"  @click="editItem(item)">mdi-pencil</v-icon>
-              <v-icon small  @click="deleteItem(item)"> mdi-delete</v-icon>
+              <v-icon small  class="mr-2" @click="editItem(item)">mdi-pencil</v-icon>
+              <v-icon small  class="mr-2" @click="deleteItem(item)"> mdi-delete</v-icon>
+              
             </template>
             <template v-slot:no-data>
               <v-btn color="primary" @click="initialize">Reset</v-btn>
@@ -200,6 +230,13 @@
   </div>
   <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+
+  	<!-- importacion para pdfjs -->
+  	<!-- <script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.15/vue.js'></script> -->
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.4.1/jspdf.min.js'></script>
+<script src='https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/2.3.4/jspdf.plugin.autotable.min.js'></script>
+
   <script>
   // Setup Firebase
   // Your web app's Firebase configuration
@@ -250,8 +287,9 @@
         ],
       
         visible: false,
+         btnImprimir : false,
 
-        ebaisAutorizados: { nombre: ''},
+        ebaisAutorizados: { Nombre: '', Codigo:''},
         listaEbaisAutorizados: [],
        show1: false,
         password: '',
@@ -320,7 +358,7 @@
           return  this.editedItem.nombre == '' || this.editedItem.cedula == '' || this.editedItem.tipoid == ''  || this.editedItem.telefono == '' || this.editedItem.ebais == '' || this.editedItem.direccion == ''
       },
     contraseñasVisible(){
-        return this.ebaisAutorizados.nombre == ''
+        return this.ebaisAutorizados.Nombre == ''
     }
 
     },
@@ -339,7 +377,9 @@
               ///////////////////////////////
              //Leer documentos en Fire Base//
              ///////////////////////////////
-            coleccion= ('CopiasTelefono' + this.elegirEbais.codigo)    
+            coleccion= 'Domicilios263220'//('Domicilios' + this.ebaisAutorizados. Codigo)  
+            console.log(coleccion)  
+            //coleccion= ('CopiasTelefono' )    
             db.collection(coleccion).orderBy("Fecha", "desc").onSnapshot((querySnapshot) => {
                       pacientes.length = 0;
                       querySnapshot.forEach((doc) => {         
@@ -373,27 +413,97 @@
        this.desserts = pacientes
       },
 
+
+exportPDF() {
+var fechaImpresion = new Date().toLocaleString();   
+
+// You'll need to make your image into a Data URL
+// Use http://dataurl.net/#dataurlmaker
+		
+		var imgData = 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxMSEhMTExMVFhUXGB8YFxgYGR4fGBkeHh0XIBgfHiIdHSggHxsmHh0YITEhJSkrLy4uFx8zODMsNygtLisBCgoKDQ0NDw0PDysZFRkrNy0tNystKysrKzctKysrLSsrKysrKysrLSsrNysrKysrKy0rKystKysrKysrLSs3Lf/AABEIAMgAyAMBIgACEQEDEQH/xAAcAAADAAIDAQAAAAAAAAAAAAAABgcEBQIDCAH/xABKEAABAgMGAgYHBAUKBgMAAAABAgMABBEFBgcSITFBURMiMmFxgRRCUpGhscEII2LRM3KSorIVFyVDU3OTwuHwFiQ0VGPSNYKz/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAH/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwC3wQQREEEEEAQQQQBBGNaNoNMILjziW0DcqNBEmvZji02SiSb6U7dIvRHkNz8ICxE0hcti/VnStQ7NtBQ9VJzK9yaxBDMW5bJIHTKQeCeo0PHYEeNYZbFwHeVQzUylHNLYzH3mgiqZ7Qxzs9H6Nt93vCQkfvGvwjRzGP4r1JGo/E9T5IMM9nYL2Y3TOHHT+JdB7k0jfy+Hdlo7Mk15gn5kwEu/n+e/7Jv/ABFf+sZLGP59eRH/ANXvzRFUFzrP/wCyl/8ACT+UYsxh9Zi+1JM+Qp8iIBPkMdpFRo6y+330SofA1+ENlj4i2ZM0Dc02FH1XOof3qRp7QwbstyuVtbR/As09xrCfbOApFTKzQP4XU0+I/KAuCFhQqCCOY2jlHmFyzbcsY1T0yEA7oOdo+Wo+EOF1cc9QieapwLjf1T+UBboI19jW1LzbYcl3UuJPsnbxHCNhEQQQQQBBBBAEEEEAQQQQBBBATAEIGIOKEvZ9Wm6PTHsA9VH6x+kKuKeK+QqlJBXW7Ljw4cwjv741OHGEy5rLNT+ZLajmS2e253q4gHlvFUvMSdq3gezEqKK9o1DKPAbGK1dDCGTlKLeHpDo4qHUB7k/nD/IyTbKEttIShCRQJSKAR3wHBppKQEpASBsAKCOccVrAFSQBzMfUqBFQajuiI+wQn4nXz/kuVC0pCnnDkaSdq01J7h9RCG1Z95X2PSxM5CRnSzWhI3GlKA04QFsgieYTX7XaCXGJgBMyz2uGYbVpwIOhihwBBHXMvpbQpa1BKUgqUTsANSYnJxrs3pCj73LWnSZdPGla0gKSpIIoRUHhCPe3C2RnQVBHQu+22Ke8bGG6yrTamWkvMLSttWyh/vQ90ZcB5iti61p2E70zSldGD+lbqUkclj84pmHuLrM2UsTeVl86BX9Ws/5T3RTnmkrSUqAUkihBFQYi+JGD4IVM2eKK7SmOB55OR7oqrXBEAwyxTcllCUnyotg5UrV22zyVXUp+Ii+tOhSQpJBSRUEbEcIiOUEEEAQQQQBBBBAERbGbEcozSEorrbPOJ3H4E9/Mw1Yu34/k+W6Noj0h4EI/AOKvy74n+C1w/SXPT5oFTaVVbSr+sV7RruAfeYqtxhFheEBE7Ooqs9ZppXq8lKHtcQOHjtZ4I+E0iI+wq4j3nds6UMw0yHTUJNToiuxIGpEa67eKErNTbsoQppSVFLRXp0lN/wBVVa6HeG+2LORMsOsOCqHElJ8+PlvARexLs2hbzfpc3PZGTXIhvhTuFAmnmYz8C5x5EzOySnelZaPVVWqahRHV7iNfKEi79izSp1dirnFy7WdRKRWi6cBSlajXXTSN5fi4rlirlZyz1PKyqAXXU5uHZA6qhUU/OKrd/aNl1ZJB6nUQtaVcqqyEfwKisWLPIfl2XWyChaAoEbbfTbyjWTcg1asgETDK20vIBKFijjauHgQYnLWEE+0lTLFqqRLqOqBnFR3pCqVgMTDtQVeOdU1q3RypG3D61i4wq3CuMxZbaktkrcX+kcUNTyAHBPdDVEQvX7kTNSUxKNrSHnWzkSVAFVCD40NKV74jtxbelJZtVlWrKJaVUjpFo1qont8RSuihpSkOOM12Jp1ctPyiS4uW7TYrUgKCgQBqdagjlCXf6/ktacqGjIOJnQQEqp2NRmoe0QdspHyiqouE105izhMocWhbK1JWyUKqCKGp25ZfGKAtYAqSAOZhMugpdm2M2qbJBabKlA7pGpSnx2ETKy7Ln7yvLfeeUzKIVRIGw7kprQnmowHoBKgRUGoj7EGnZebuzMMqTMKfknVUUhXdTNpUgKANQRvF2YdC0pUNlAEecRE0xXwzROoVMyyQmZSKkDZ0DgfxcjCZhHiGuUcEjOEhoqyoUrdpW2U19Wvuj0DEaxuw/C0qn5ZPXTq8lI7Q9sd44xVWUGCJNghfszLfoT6qutj7tROq0Dh3kfKKzEQQQQQBGNac8hhpx5w0QhJUo9wjJiO/aEvMW2m5JB1d67lPZHZHmflAIEiy9eC1iVVyFVVfgaSdB7vnHpqQk0MtoabSEoQAlIHACEDBG6/okkHlj72Y6x5hPqj6xRoqiEBWKUsi0nJF1KmkpIQl1WgK+II4J5K4w/wmYi4fs2m3XREwkdRwcfwq5j5REanEvDVE8DMytG5odao0S5TatPW5KjDwjvw+64uzp0H0hoHKo9pQTuFd458YV7Bv9PWMVSc8wt0I0bPEcqH1kxv8LLEmJqeeteZR0eeobRSla0FfCkVTFe3Dz0ufl51p7oVt06QgVKsp6tPLQ14Q9056x9giIIIIIAgj4tQAqSAOZ2hZtfEGzpaocmmyoeqg5j8IBnjp9FRmz5E5vayjN794UbHxSsyZcDaH8qiaDpE5QT4nSHSAUMWLOcmLLmUNAlQAVQbkJNSPdC7hBe2SRZzbK3UNONVC0rNCdT1tYqMIV4sJbPm3C7lU0omqujNAfLasVU/v5bRt60JeRlAVMtq6y+BrTOruSAKCLxKshCEoGyQAPIRoLvXYkrKaWppIQAKuOKNVEDmeXdE9tjGCYfeLNlyxdoaZyCSe8AbDxgLNHFaAoEEVBFCOcSi62J8ymaRKWpL9ApygQuhGp2qDpTvEVmIjzNiJYLljWkiYl6pbUrpGiNgfWT4b+Rj0FdS3UT0q1MI2WnUclesPIxqsTbsifkXWwPvEDO2fxDh5jSJfgBeMtTDkg4aBdVIB4LT2h5j5RVXyCCCIj4TTWPMU0TbNvUBqhTuUdzbfHwoCfOL3iJavotmzboNFBspT+srqj518olP2c7IzPTM0R2EhtPirU/AfGKq7MthKQlIoAAAOQG0YluWmiVl3ZhfZbSVHv5DzNB5xnRoL+2Qubs+Zl0dtaOr3kEKA86U84iJfdyzbUtlYnXZpTEtn6qEkiqAdaU25VMfJjGd5qbeUGQ7Ipc6NCgKHQbhWxJoVUPAxzwuxDlmJf+Tp/wC5LeZAUsHIQSapX7J1I10jGxJtCzGpEWdZ3RureeDlGlZwk1HrVOp0SEg6CsVVXuzbsrajIfaTmAOU50CqTxGv0jfJFNBGuu3I9DKsNlICg2nPQAdbKM23GsbKIgggjpnJtDSFOOLShCRVSlGgA7yYDuhIvziRLWf92n76ZOgaRrQ8MxG3hvCpb2Ic1abqpKxkKpsuYIpQbEivYT3nU8BDNcTDRiR++dPTzR1LitQk8coPzOsVSnL3ati2SHJ14ysudQ0nRRHhw8TDdZGFNmSwqprpSNSp018TyEbO/V9pezGs7pzOK/RtDtK7+5PfE7lbDte3aOzTxlJRWqG01BUOHV+qvdAbLEOz7CWwtvpJdl9IJbU3qQrgDl3EbLAy8i5uRU26oqXLqCMx3KCKor3ihHkIXr2XTsaxpZS3EF+YUCGkuLJKlU3KRQBI3JpDFgbdtcpIl10FLkyoOZSKFKQKIr3mpPmICjQQQREIOOCnBZLvR17aM9PZrr5VpHfhBZ0q3ZrC5cJKlpBdWO0V+sDyodKQ4T0mh5tbTiQpCwUqSdiDEoGDTrL6Vyc+tpsLCwkpJKSDUbEA+Yiq44+MOOuWe020StThyuDnpRP+byityiClCAo1UEgE94ArGmvBeiRkwDNPtJUnUJ3XWm4SKqELl2cVpaenRKstOBKgSHF6VIG1BWnmYCgx5mxFklWVbQfaFElaX0U5E9Ye+oj0zEi+0VZGeVYmQNW15FH8KtviPjAVaz5tLzTbqDVK0hST3EVEfISMD7V6eymkk1UypTR8Bqn90geUERGs+0PO5LPbb/tXgD4JCj86Rl4CyHR2WF01dcUryFAPkYWPtKPn/kUcD0qvd0Y+pijYYMZLKkk/+Kv7RJ+sVTRBWCJDhlabqpi2HVOLUlBUUgqJCaZzoDpwiIdL04eyE+rO8zRz+0bOVZ8aaHzBjFuthhZ8i4HW0KcdT2VunNlPMCgAPfSsafDq8k1M2VOzEw6VrQXciqAEBLdRsBx4xk4G2i/MWepx91biumUkFZqQAEae8mKqhwQQREdU1MJbQpxaglKQVKJ2AG5iJuvTd5ZpbbbimLNaVQkevTavtKO9Don57fFm33Jp5ux5M1ccI6ZQ9Ucj3cT5RRLrWC3Iyzcu0NEDU8VK9ZR7yYqo5e25q7vhqfkZp0pDiUuIXTUGtK5QApPChHGLKq2kJk/S1aI6IOnwKa0hF+0DMgWchuvWceSAOJoCT9IMUXVM2AlAqCUNNnwomo+EAqXcuuLcM1aVouLbZNQ1Q0yhPHUEZQPjCK/PzDK3RZ01OrlkaZ+skAeCVEAd+nhFrnrKWLt9CwDm9HBonc7FUduC07LO2YhlsJzoBS+gjUqNak8wYCUruwtUo1a8vMGdW0sKfQ6ipTloaKBUoqA467GsXy5l5mrRlUTDWnBaOKFDdJ+h4ikT3B1sMz9rSVPu0rqlJ2pmUk+8FPujCDJu/bKQmokZw0pwQa/5Sf2TAWyCCCIghMxMsW0JpplEg+WjmId62UFJG9R1tCNhzhzjAt+Xccln0MqyuqbUG1VpRRBymo21pATOwMDpdJzzr631nUpTVKK8antK8aiKVY9gy0onLLsNtD8KQCfE7nziIqv9bdmviVmkJfXTMEkVUpOtKKR4HhDZZGNsqohM0y7Lq41FU/n8IqqnCpinIdNZc2mlSEZx4pIPyBhkkJxDzaHW1ZkLGZJHEGOi3Wc8tMI9ppY96SIiI/8AZtnf+tZ/UcH7yT8hBGk+zy8U2k+jgphX7q2/zMEVWw+0n+mkv7tf8SYrtxh/R0l/cN/wiJV9pRnWRX3Op/8AzI+sUvDR/PZckr/xAe6o+kAyLrQ03ppHnyXu1b0oZpMuz1H1Kz0ymoNe/kY9Cx0uzbaVJQpaQpfZSSApXOg3MRHnizE25JSjsmiTPRuBQUclVdcUVqDyipYLWa5L2YhDqFIWXFqKVChFTQfACMa92LkrIzCpcNrdWjRZSQAk8RruRDZdS8rFoMJfYVVJ0Uk9pCuIMVW4hWxEvcizZVTmhdV1Wk8Srn4CGmIPeGZbN4f6UKksNkdACPuztlJ7q7nuiIbsILpraQufmqmZmOt1t0pOvvMOF7rys2fLqmHjoNEpHaWrgBG2YdSpKVIIKSKpI1BHClIkGMpSu07LamDSVKqrr2e2AqvlQeBiq6rr2DNW3NotGfGSWQasM8FCtRp7O1TxpDZjbK57JeoOwUq8goVh5ZSkJATTLQZabU4U7oUL/Xls9Es+w/MN1W2pORJzKqRpoNtedIDGsm9TUrYbE04QQlkJA9pWwTEuu1aC7OK7WePR+k5uhlkCgcqdzyQDGJcCxJq1AxLuEiQllFalHRJrqRXifkIYMYbdk5oS0lJ0ceaWAko7KRtlrx2HdpAYd3G7dZmHrQak8xmRmUFAbE1FBWohrxsbU5ZEu88kJfSttRHsqUnrgefyhqnL+SEm0gPzTZcCQFJbOY1oK9nT3xOrXtWZvK81Ly7KmpJtYU44rjTmdq0rRI5wFju68VykstW6mUE+JSKxsI6pVgNoQhPZQkJHgBQR2xEEcH3QhKlq2SCo+AFTHOMW1H20MurdNG0oUV/qgHN8KwHnm9N9TN2szN2c0ta2kBKQpNcx62tBsNeMbhnDi07VcD1oLQynegSM+vcPqYodzbZsVKAiScl0dxolfnmoSYdEqB1BqIqsGwbKTKS7UugkpbTlBO5jLmOwrwPyjsjDtl3JLvq9ltZ9ySYiPPWA/wD8ur+6c+aYI7vs9tZrTeXwDC/eVt0+sEVTr9oqSzSLLo/q3tfBSSPmBG0wLnuksptNdW1qR4a1HzjcYo2X6TZc02BVQR0ifFHW+QMTf7ONrUVNSpO4DqR4aK+YgLlEYkZZU5ed7pnFJ9G6zSQaVAAA8tdedYs8Tu/2HC5yYROSkwZaZAopQJFeRBTqDTSIhUw5l2lW3aqnQhaUhdVLAoBn62+lKRl4IuoE/arcuay2fM3Ts0zrCKeKfgIZMP8ADYSCJgvu9O7MJKHCK0ymtRrqSa6kwx3RunLWa0WpdJGY1WpRqtR4VPdyEVW9jTXnuvLT7RbmGwr2VbKSeYPCNzBERFrrWo9YU/8AydNrKpR01YcVsmp08BwI4GKXe+6svaTHQvjvQtPaQeY/LYwh/aDIWzJsBCSt16iVndOw34A5hXwjEuhft+y1iz7XSUpSPun9SMoGlSO0ngFDXnFUtW5L2tZ7jVkqmyJd9YDTuvZJoRXtJpUVTXlzh6Zw2smzGTMTh6XKKqW6dCeQSNCTwGsJV+Lyu2vOMuWfLuPNSQLlcp6xzJKjTenVSAN94194r6otSdlxPhcvKtCq2xUkq9bhXXbbQVgGK0r2ztqNLlLKk+hlaZVOmiQE8ddEpHcKmJlZt1ZiYmTLStH1p7S0V6NPM5iBp38eEU62r3LtJKLMsZhSGSMq3MuUBPEabJ5k6mKlcm6rNmyyWWxVW7i+K1cT4chAQ27dlsWVOhi2ZRJDhBbfJKkJ7/ZUiu5pUR6Mk2m0oSGgkIp1clMtOFKaUiXX0w7tG0plzpJ1KZULzNIIqU6cgAK8NTGJK4aWxLoCJe1iEJFEozLCR3AagQFigiRCy70sapmmXwPVOQ1/aQD8Y77FxRmGH0y1ryvo6lGgdSCEd1QSdO8EwFWhCxttToLKeANFPFLQ8zVX7oPvh8QoEAg1B1BjRXvulL2k2huZz5UKzJyKoa7ciDp84iJrY+Csu/JSzinXWn1tJWoihTVQqNCNKAgaHhGN/NnbMkayU9nSOGdSD+yqqfjFwQkAAAUA0Aj7FVj2chaWmw4rMsJGc81UGbbvjQ4lT3Q2ZOLrQ9EUjxV1frDNEp+0La3RyTTAOrzlT+qj/Uj3REaP7Nsl1px7hRDY/eJ+kfIbcB7L6GzEuEUL61OeQ6qflXzgiqojiAoEHUEUMeY7KWbGt3KahtLpQe9te3wI90enoiH2hrtn7qeQNvu3SP3CfiPMQFuSoEAjY7R9hGwgvOJ2QQFH71n7tfPTsnzEPMRBBBBAEEBMLlt36s+Ur0syjMPVScyvhAKmPdnqVJszCBUy7oV4A0194EMrEjJWxJyzzzSHUlIUmu6TQZhUa76EQkW7i2zNNuS8vJPTCVgoOmmvcATC7caXvBKtLalZfK2pWYdKB1a70qYqrtZdlMyyA2w0htA4JFPfzPjHTaFgSr5zOy7SzzUgE++lYmgse8zuqpppruBH5Qf8IXhOptMV8f8ASAqkhZzLCcrLSG08kJA+UZMSL/hK8SdRaST5/wCkff5FvMjabaX4kflAVyCJELQvQz2mWXR3AV+cAxRtGX/6uy3AOaK/kRAV2FXEu7iJ6ReQUjOhJW2riCkV+I0jTWRjFZzxyuKWyrktOnvEcsSb9MMyCjLuodcfBbbyEHfQnTuiI7cFrXXMWa2FmqmlFsk8QNvhD5CbhPd5UlZ7aHNHFkuLHIq2HupDlAEEEEAR5rxdtJVoWsmXaOYIKWEcsxPWPvPwi6X8vEmQknnyesBlbHNR7P5+URjAuwVTU85OuiqWqkE8XFfkCT5iKq92NZ6ZdhphAoltCUDyAEEZkERBGvt+yUTcu7LuCqXElJ7uR8o2EEB5iufarth2qpp6obzdG6OBST1V/WPTTLoWkKSQUkVBGxB2iYY23GM2z6Wwmr7Q6wG60DfzG8abA+/wIFnzKusP0ClcfwHv5RVWuCCCIjU3qsQTss5LlxTeenWTuKGFaw8IrOYopaC+viXDUV8Nof4IDGk7PaaAS02hAGwSkD5RkxP7Tel1zc4J+YU0GwOgSXC2MmWpWihGdeavM6UpGLJzDDz6kz0y6htLLZlw+50JWkp66zQpBczaHlQRVUqCJEmbccbl+lfCkhL5aRMurY6ZrpaMuBwbuBA2VwUDGWqRbmJez3iqYq48lpZU8qqkhSxukgKGmigNRSAqUES+80++h9PoiX1MSGUqKVVSok/eBZUrMaI8dY319ny81I9D1g68nq5ygLBQs0Kk6gcfKAco+KSDoRWJcw8+046yrM3knJTK2HVOJCVkVopWtFEGqaUFI52VNy6mUvTEy8J/pilaELPTJX0hGQNVp0eWnCmXWAcrZudIzQPTSzajzAor3iJ7bmCDdekkphTS0nMlK+skEaih3EbBq33/AE/0wpe9DU56MDp0OTYL3zV6SutNop8BO7jPW23M+jzyELZCSemHdsARx8RFEggiIIIImGM9/RJsmUYV/wAw6OsR/VoPH9Y8IBAxgvOq0Z1EnL1U22rIkDZbh0J8BtFtuHdxNnybTA7QGZw81HtflEzwKuOR/SMwnU16AH4r+gi2xVEEEERBBBBAEQDGHD1Uq4Z+TBDZVmcSndtVe0KerX3GL/HF1oKSUqAKSKEHYjjATPCbEpM6hMtMqCZpIoCdA6BxH4uY84p0efsTsMHJRZnJEKLQOZSE9to8001y/KN5hpi8lwJlp9QSvsoeOyuQXyPfFVZYI+IWCAQQQdiNo+xEdbrCFUKkpVTUVANPCu0fH5dC6Z0JVTUZgDTwrHbBAdb8uhYotCVAagKAI+Mc8g00Gm3dH2CA+BA10Gu/fHzINNBpt3RyggOJbFa0FedOW0cegRmz5U5qUzUGanKu9I7IIDj0YpSgpyppHKCCAIIImGJGLDUmFMShS7MbFW6G/HmrugNviXiC1ZrRSkhcysdRHs/iV3d3GJLhvct615pU3NlRZC8y1Hd1Xsju58hpHy4Vwpm13jNzalhkmqlq7Tp5J7u/blHouz5JthtLTSQhCBRKRsBFV2stBKQlIASBQAbADYRzggiIIIIIAggggCCCCACKxJsRcIG5kqfkqNunVTeyFnu9kn3RWYIDzPdy/Vo2M56PMIUptJoWnK1H6h/2Itl08QpGfADboQ5xbXory4GNreK7UrPIyTDSVjgfWHgdxEavTgk+0S5IOdIBqEKOVweB2PwiqvkEeZpC/dsWUoNPBZSNMj6SR5K/Iw+WJjtLLoJlhbR4qR1k+7Qj4wFdghUs7EazHqZZtsE8F1SfiKRvWLZll9iYZV4OJPyMRGdBHX06PaT7xGO9arCO0+0nxWkfMwGZBCzaGIFms1zzjVRwScx/drCfbOOUk3UMNOPHgT1U/Gp+EBVoX7z3zk5BJL7yQrghOqz5D6xC7VxQtW0FFqXSWwfUYSSqnerUxm3cwbnZpQdnXCyk6kE5nT9B5xVdF7sUpy0VejyaFttq0CUauL8SNh4Qw4e4N0KZi0dTuGK/xn6CKZda5knZ6aMNAK4rVqs+cMMBwZaShISkBKQKAAUAHdHOCCIgggggCCCCAIIIIAggggCCCCAIIIIDHnZJt5JQ62haTuFJBHxhItnB+zH6lLSmVHi0qg/ZNR7oIIBQtDAL+xnfJxv6pP0jSPYGWik9R+XUP1lp/wAhggiqx/5mbW9pn/FP/rHc1gdaSu29LgfrrJ/ggggNxIYBKr99OCnJts196j9IbbHwYs1mhcS4+R/aKon3JpBBAPVm2UxLpCGGW20jghIHyjMggiIIIIIAggggCCCCAIIIID//2Q=='
+		var doc =  new jsPDF('p','mm','letter')
+		//var doc =  new jsPDF( 'p', 'mm', [160, 500]);
+		
+		doc.setFontSize(11)
+		doc.setFontType('bold')
+		doc.text(5, 25, 'Caja Costarricense de Seguro Social')
+		doc.text(5, 30, 'Area de Salud Limon')
+		doc.addImage(imgData, 'JPEG', 5,3, 18, 18)
+				doc.setLineWidth(0.2)
+				doc.line(5, 26, 190, 26)
+		doc.setFontSize(11)		
+		doc.setFontType('normal')		
+		doc.text(0, 40, 'Fecha Impresion: '+ fechaImpresion)
+				
+		doc.setFontSize(11)
+		doc.text(0, 45, 'Cedula: '+ this.editedItem.cedula)
+		//doc.text(0, 50, 'Nombre: '+ this.editedItem.nombre)
+
+		var splitNombre = doc.splitTextToSize(this.editedItem.nombre, 75);
+		doc.text(0, 50, splitNombre);
+
+		doc.setFontSize(13)
+		doc.setFontType('bold')	
+		doc.text(0, 60, 'Telefono: '+ this.editedItem.telefono)
+		doc.setFontSize(11)	
+		doc.setFontType('normal')
+		doc.text(0, 65, 'Ebais: '+ this.editedItem.ebais.nombreEbais)
+		var splitTitle = doc.splitTextToSize(this.editedItem.direccion, 75);
+		doc.text(0, 70, splitTitle);
+		//doc.text(5, 67, 'Direccion: '+ this.editedItem.direccion)
+		doc.text(0, 85, 'Fecha Registro: '+ this.editedItem.fecha)
+	    doc.text(0, 90, 'Firma Recibido')
+	    doc.setLineWidth(0.5)
+		doc.line(0, 100, 200, 100)
+		doc.setFontSize(10)
+		doc.text(0, 120, this.editedItem.varid)
+		doc.save('domicilios.pdf');
+		
+    },
+
       validarExisteUsuario(){
-        console.log('presiona enter')
-        console.log(this.correoUsuario)
+
+        if (this.correoUsuario ==  null)  {
+           Swal.fire({
+                icon: 'error',
+                title: 'Error de validacion...',
+                text: 'El usuario es requerido para continuar!',
+                footer: '<a href>Why do I have this issue?</a>'
+              })  
+            console.log('funcion')
+        }else {
+       console.log(miarray.length)
             db.collection("perfilesUsuario").where("correo", "==", this.correoUsuario).onSnapshot((querySnapshot) => {   
                  querySnapshot.forEach((doc) => {                              
-                    console.log(`${doc.data().Autorizado.length}`);
-                      miarray=[]
-                    var miObjeto = doc.data().Autorizado
-                           miObjeto.forEach(function(item) {
-                             miarray.push({nombre: item})
-                          })
-
+                    //console.log(`${doc.data()}`);
+                     //console.log(doc.id, " => ", doc.data());
+                     console.log(doc.id, " => ", doc.data().Autorizado);
+                     //console.log(db.collection.length) ///aqui nos quedamos
+                    miarray=[]
+                    // var miObjeto = doc.data().Autorizado
+                    //        miObjeto.forEach(function(item) {
+                    //          miarray.push({nombre: item})
+                    //       })
+                                //console.log(miarray.length)
+                                  //console.log(this.listaEbaisAutorizados.length)
+                                  miarray =  doc.data().Autorizado
+                                  console.log (miarray +'es')  
                                this.update()
-                        });                                      
-                    })
+                        });
+                                        
+                    });
 
-      },
+      }
+
+
+        },
+        //console.log('presiona enter')
+
 
       update(){
-           console.log(miarray)
+           //console.log(miarray)
           this.listaEbaisAutorizados = miarray
+          
       },
 
     ingresoSistema(){
@@ -435,6 +545,7 @@
   
         this.editedItem = Object.assign({}, item)
         this.dialog = true
+        this.btnImprimir = true
       },
 
       deleteItem (item) {
@@ -452,6 +563,7 @@
 
       close () {
         this.dialog = false
+         this.btnImprimir = false
         this.$nextTick(() => {
           this.editedItem = Object.assign({}, this.defaultItem)
           this.editedIndex = -1
