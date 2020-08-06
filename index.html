@@ -117,7 +117,7 @@
                 >
                 </v-text-field>
                 <v-spacer></v-spacer>
-                <v-dialog v-model="dialog" max-width="700px">
+                <v-dialog persistent v-model="dialog" max-width="850px" >
                   <template v-slot:activator="{ on, attrs }">
                     <v-btn
                       color="primary"
@@ -181,12 +181,23 @@
                           <v-col cols="12" sm="12" md="12">
                             <v-text-field v-model="editedItem.nombre" label="Nombre"></v-text-field>
                           </v-col>
-                          <v-col cols="12" sm="6" md="4">
+                          <v-col cols="12" sm="6" >
                             <v-text-field v-model.number="editedItem.telefono" label="Telefono"></v-text-field>
                           </v-col>
-                          <v-col cols="12" sm="6" md="4">
+                          <v-col cols="12" sm="6" >
                             <v-text-field v-model="editedItem.correo" label="Correo"></v-text-field>
                           </v-col>
+
+
+                         
+                          <v-col cols="12" sm="2" >
+                            <v-text-field v-model.number="editedItem.codConductor" v-on:keyup.enter="mostrarConductor" label="Codigo"></v-text-field>
+                          </v-col>
+                          <v-col cols="12" sm="10" >
+                            <v-text-field v-model="editedItem.nomConductor" label="Conductor"></v-text-field>
+                          </v-col>
+                        
+
                           <v-col cols="12" sm="12" md="12">
                             <v-select
                               v-model="editedItem.ebais"
@@ -206,6 +217,8 @@
                       </v-container>
                     </v-card-text>
                     <v-card-actions>
+                      <v-spacer></v-spacer>
+                      {{editedItem.correoUsuario}} / 
                       <v-spacer></v-spacer>
                         {{editedItem.varid }} - 
                       <v-btn color="blue darken-1" text @click="close">Cerrar</v-btn>
@@ -254,6 +267,8 @@
   var db = firebase.firestore();
   pacientes= []
   miarray=[]
+  nomConductor= ''
+
   console.log(miarray)
   arregloEbaisAutorizados = []
       const cm = new Vue({
@@ -277,13 +292,13 @@
         /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
     ebaisAdcripcion: { nombreEbais: '', codigoEbais: '' },
         itemsEbaisAdscripcion: [
-          { nombreEbais: 'Area Salud', codigoEbais: '2632' },
+         
           { nombreEbais: 'COCOS', codigoEbais: '263201' },
           { nombreEbais: 'COLINA', codigoEbais: '263202' },
-          { nombreEbais: 'Pueblo Nuevo', codigoEbais: '263203' },
-          { nombreEbais: 'Corales', codigoEbais: '263204' },
-          { nombreEbais: 'Santa Eduviges', codigoEbais: '263205' },
-          { nombreEbais: 'Cristobal Colon', codigoEbais: '263206' },
+          { nombreEbais: 'PUEBLO NUEVO', codigoEbais: '263203' },
+          { nombreEbais: 'CORALES', codigoEbais: '263204' },
+          { nombreEbais: 'SANTA EDUVIGES', codigoEbais: '263205' },
+          { nombreEbais: 'CRISTOBAL COLON', codigoEbais: '263206' },
         ],
       
         visible: false,
@@ -329,8 +344,11 @@
         nombre: '',
         cedula: '',
         tipoid: '',
-        telefono: '',
-        correo: '', 
+        Telefono: '',
+        correo: '',
+        codConductor: '',
+        nomConductor: '',
+        correoUsuario: '',
         ebais:'', nombreEbais: '', codigoEbais:'',
         state: '',  minimo: 0
       },
@@ -338,8 +356,11 @@
         nombre: '',
         cedula: '',
         tipoid: '',
-        telefono: '',
+        Telefono: '',
         correo: '',
+        codConductor: '',
+        nomConductor: '',
+        correoUsuario: '',
         ebais:'', nombreEbais: '', codigoEbais:'',
         state: '',  minimo: 0
       },
@@ -392,6 +413,9 @@
                                 ebais: doc.data().Ebais,
                                 telefono: doc.data().Telefono,
                                 correo: doc.data().Correo,
+                               nomConductor: doc.data().codigoConductor,
+                                codConductor: doc.data().nombreConductor, 
+                                correoUsuario: doc.data ().Usuario,
                                 fecha: fechaRegistro,
                                 direccion: doc.data().Direccion,          
                               });    
@@ -407,12 +431,56 @@
     this.initialize()     
     },
 
+
+
     methods: {
       initialize () {
        this.desserts = []
        this.desserts = pacientes
       },
 
+
+  mostrarConductor: function(){
+
+
+
+        codigo = this.editedItem.codConductor
+      console.log(codigo)
+     /* db.collection("Conductores").where("Codigo", "==", codigo).onSnapshot((querySnapshot)=> {
+        querySnapshot.forEach((doc) {
+            // doc.data() is never undefined for query doc snapshots
+            console.log(doc.id, " => ", doc.data().Nombre);
+            nomConductor = doc.data().Nombre
+            console.log ('chofer >>'+ nomConductor)
+           
+        });
+
+    })
+        .catch(function(error) {
+            console.log("Error getting documents: ", error);
+        });
+           this.editedItem.nomConductor=nomConductor
+
+*/
+
+
+
+      db.collection("Conductores").where("Codigo", "==", codigo).onSnapshot((querySnapshot) => {   
+                 querySnapshot.forEach((doc) => {                              
+                    //console.log(`${doc.data()}`);
+                     //console.log(doc.id, " => ", doc.data());
+                     console.log(doc.id, " => ", doc.data().Nombre);
+                     //console.log(db.collection.length) ///aqui nos quedamos
+                     nomConductor = doc.data().Nombre
+                     this.editedItem.nomConductor=nomConductor
+                
+                        });
+                                        
+                    });
+
+
+
+      },
 
 exportPDF() {
 var fechaImpresion = new Date().toLocaleString();   
@@ -456,6 +524,7 @@ var fechaImpresion = new Date().toLocaleString();
 	    doc.setLineWidth(0.5)
 		doc.line(0, 100, 200, 100)
 		doc.setFontSize(10)
+    doc.text(0, 115, this.editedItem.correoUsuario)
 		doc.text(0, 120, this.editedItem.varid)
 		doc.save('domicilios.pdf');
 		
@@ -492,7 +561,6 @@ var fechaImpresion = new Date().toLocaleString();
                         });
                                         
                     });
-
       }
 
 
@@ -590,6 +658,9 @@ var fechaImpresion = new Date().toLocaleString();
               Telefono: this.editedItem.telefono,
               Correo: this.editedItem.correo,
               Ebais: this.editedItem.ebais,
+              
+            nombreConductor: this.editedItem.codConductor,
+            codigoConductor: this.editedItem.nomConductor,
               Direccion: this.editedItem.direccion,
               //Fecha: firebase.firestore.Timestamp.fromDate(new Date()),              
               //Fecha: firebase.firestore.Timestamp.fromDate(new Date()),
@@ -617,6 +688,9 @@ var fechaImpresion = new Date().toLocaleString();
              Correo: this.editedItem.correo,
              Ebais: this.editedItem.ebais,
              Direccion: this.editedItem.direccion,
+            Usuario: this.correoUsuario,
+            nombreConductor: this.editedItem.codConductor,
+            codigoConductor: this.editedItem.nomConductor,
              Fecha: firebase.firestore.Timestamp.fromDate(new Date()),         
     })
     .then(function(docRef) {
