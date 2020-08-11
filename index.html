@@ -419,7 +419,7 @@
                                 correo: doc.data().Correo,
                                nomConductor: doc.data().codigoConductor,
                                 codConductor: doc.data().nombreConductor, 
-                                correoUsuario: doc.data ().Usuario,
+                                correoUsuario: doc.data().Usuario,
                                 fecha: fechaRegistro,
                                 direccion: doc.data().Direccion,          
                               });    
@@ -534,7 +534,7 @@ var fechaImpresion = new Date().toLocaleString();
 	    doc.setLineWidth(0.5)
 		doc.line(0, 100, 200, 100)
 		doc.setFontSize(10)
-    doc.text(0, 115, this.editedItem.correoUsuario)
+    //doc.text(0, 115, this.editedItem.correoUsuario)
 		doc.text(0, 120, this.editedItem.varid)
 		doc.save('domicilios.pdf');
 		
@@ -669,7 +669,7 @@ var fechaImpresion = new Date().toLocaleString();
               Telefono: this.editedItem.telefono,
               Correo: this.editedItem.correo,
               Ebais: this.editedItem.ebais,
-              
+              Usuario: this.correoUsuario,
             nombreConductor: this.editedItem.codConductor,
             codigoConductor: this.editedItem.nomConductor,
               Direccion: this.editedItem.direccion,
