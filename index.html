@@ -19,7 +19,7 @@
           <div>
             <v-toolbar dark src="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg" >
               <v-app-bar-nav-icon></v-app-bar-nav-icon>
-              <v-toolbar-title>As Limon</v-toolbar-title>
+              <v-toolbar-title>Registro Entregas a Domicilio </v-toolbar-title>
               <v-spacer></v-spacer>
               <v-btn icon @click="cerrarSesion"><v-icon>mdi-export</v-icon></v-btn>
             </v-toolbar>
@@ -102,7 +102,7 @@
           >
             <template v-slot:top>
               <v-toolbar flat color="white">
-                <v-toolbar-title>Registro Entregas Domicilio</v-toolbar-title>
+                <v-toolbar-title>{{ebaisAutorizados.Nombre}} </v-toolbar-title>
                 <v-divider
                   class="mx-4"
                   inset
@@ -402,10 +402,13 @@
               ///////////////////////////////
              //Leer documentos en Fire Base//
              ///////////////////////////////
-            coleccion= 'Domicilios2632'//('Domicilios' + this.ebaisAutorizados. Codigo)  
-            console.log(coleccion)  
+            coleccion = 'Domicilios'//('Domicilios' + this.ebaisAutorizados.Codigo)  
+            console.log(coleccion + this.ebaisAutorizados.Unidad )
+            console.log  (this.ebaisAutorizados.Codigo)
+            console.log  (this.ebaisAutorizados.Nombre)
+            console.log  (this.ebaisAutorizados.Unidad)
             //coleccion= ('CopiasTelefono' )    
-            db.collection(coleccion).orderBy("Fecha", "desc").onSnapshot((querySnapshot) => {
+            db.collection(coleccion + this.ebaisAutorizados.Unidad ).orderBy("Fecha", "desc").onSnapshot((querySnapshot) => {
                       pacientes.length = 0;
                       querySnapshot.forEach((doc) => {         
                       var fechaRegistro = new Date( doc.data().Fecha.seconds *1000).toLocaleString();   
@@ -417,14 +420,17 @@
                                 ebais: doc.data().Ebais,
                                 telefono: doc.data().Telefono,
                                 correo: doc.data().Correo,
-                               nomConductor: doc.data().codigoConductor,
+                                nomConductor: doc.data().codigoConductor,
                                 codConductor: doc.data().nombreConductor, 
                                 correoUsuario: doc.data().Usuario,
+                                
                                 fecha: fechaRegistro,
                                 direccion: doc.data().Direccion,          
                               });    
+                              
                         });
                         console.log(querySnapshot.size);                                         
+                       
                     });
         } else {
           // User is signed out.
@@ -441,6 +447,7 @@
       initialize () {
        this.desserts = []
        this.desserts = pacientes
+       console.log(pacientes)
       },
 
       getColor (telefono) {
@@ -534,7 +541,7 @@ var fechaImpresion = new Date().toLocaleString();
 	    doc.setLineWidth(0.5)
 		doc.line(0, 100, 200, 100)
 		doc.setFontSize(10)
-    //doc.text(0, 115, this.editedItem.correoUsuario)
+    doc.text(0, 115, this.editedItem.correoUsuario)
 		doc.text(0, 120, this.editedItem.varid)
 		doc.save('domicilios.pdf');
 		
@@ -661,7 +668,7 @@ var fechaImpresion = new Date().toLocaleString();
              //EDITAR REGISTRO EXITENTE EN LA CODELCCION FIREBASE   // 
              //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*//
 
-          var registroPacientes = db.collection(coleccion).doc(id);
+          var registroPacientes = db.collection(coleccion + this.ebaisAutorizados.Unidad ).doc(id);
           return registroPacientes.update({
             TipoID: this.editedItem.tipoid,
               Cedula:this.editedItem.cedula,
@@ -691,7 +698,7 @@ var fechaImpresion = new Date().toLocaleString();
            //GUARDAR UN NUEVO REGISTRO EN LA CODELCCION FIREBASE   // 
            //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-//
           this.desserts.push(this.editedItem.cedula)
-          db.collection(coleccion).add({
+          db.collection(coleccion + this.ebaisAutorizados.Unidad ).add({
              TipoID: this.editedItem.tipoid,
              Cedula: this.editedItem.cedula,
              Nombre: this.editedItem.nombre,
