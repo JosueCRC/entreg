@@ -230,9 +230,9 @@
                             :items="pacientes2"
                             class="elevation-1"
                           >
-                            <template v-slot:item.calories="{ item }">
-                              <v-chip :color="getColor(item.calories)" dark>{{ item.calories }}</v-chip>
-                            </template>
+                          <template v-slot:item.entregado="{ item }">
+                            <v-simple-checkbox v-model="item.entregado" disabled></v-simple-checkbox>
+                          </template>
                           </v-data-table>
                         </template>
                       </v-card>
@@ -280,7 +280,7 @@
                         
                       </v-col>
                       <v-col cols="4" >
-                        <v-switch class="d-inline" v-model="switch2" :readonly="readonly" :label="`Entregado: ${switch2.toString()}` "></v-switch>
+                        <v-switch class="d-inline" v-model="editedItem.entregado" :readonly="readonly" :label="`Entregado: ${editedItem.entregado}` "></v-switch>
                       </v-col>
                    
                   </v-row>
@@ -430,6 +430,7 @@
 
        switch2: false,
        readonly: false,
+       switch3: true,
 
         /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
         /* mostrar tabla con filtros para reporte segun rango de fechas */
@@ -444,8 +445,9 @@
         },
        /*  { text: 'firebase', value: 'varid' }, */
    
-        { text: 'Nombre', value: 'nombre' },
+       { text: 'Nombre', value: 'nombre' },
           { text: 'Ebais', value: 'ebais' },
+          { text: 'Entregado SI/NO', value: 'entregado' },
           { text: 'Telefono', value: 'telefono' },
           { text: 'Correo', value: 'correo' }, 
           { text: 'Fecha', value: 'fecha' },
@@ -520,7 +522,7 @@
    
         { text: 'Nombre', value: 'nombre' },
           { text: 'Ebais', value: 'ebais' },
-          { text: 'Entregado', value: 'entregado' },
+          { text: 'Entregado SI/NO', value: 'entregado' },
           { text: 'Telefono', value: 'telefono' },
           { text: 'Correo', value: 'correo' }, 
           { text: 'Fecha', value: 'fecha' },
@@ -629,7 +631,6 @@
                                 nomConductor: doc.data().codigoConductor,
                                 codConductor: doc.data().nombreConductor, 
                                 correoUsuario: doc.data().Usuario,
-                                
                                 entregado: doc.data().Entregado,
                                 fecha: fechaRegistro,
                                 direccion: doc.data().Direccion,          
@@ -961,6 +962,7 @@ var fechaImpresion = new Date().toLocaleString();
             nombreConductor: this.editedItem.codConductor,
             codigoConductor: this.editedItem.nomConductor,
               Direccion: this.editedItem.direccion,
+              Entregado: this.editedItem.entregado
               //Fecha: firebase.firestore.Timestamp.fromDate(new Date()),              
               //Fecha: firebase.firestore.Timestamp.fromDate(new Date()),
             })
@@ -991,7 +993,7 @@ var fechaImpresion = new Date().toLocaleString();
              nombreConductor: this.editedItem.codConductor,
              codigoConductor: this.editedItem.nomConductor,
              Fecha: firebase.firestore.Timestamp.fromDate(new Date()),  
-             Entregado: false
+             Entregado: this.editedItem.entregado,
 
 
     })
