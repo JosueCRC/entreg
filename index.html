@@ -430,7 +430,7 @@
 
        switch2: false,
        readonly: false,
-       switch3: true,
+       entregado: false,
 
         /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
         /* mostrar tabla con filtros para reporte segun rango de fechas */
@@ -458,7 +458,7 @@
         ],
 
 
-      reporte: false,
+        reporte: false,
         notifications: false,
         sound: true,
         widgets: false,
@@ -535,20 +535,20 @@
         nombre: '',
         cedula: '',
         tipoid: '',
-        Telefono: '',
+        telefono: '',
         correo: '',
         codConductor: '',
         nomConductor: '',
         correoUsuario: '',
         ebais:'', nombreEbais: '', codigoEbais:'',
         state: '',  minimo: 0,
-        entergado: false
+        entregado: false
       },
       defaultItem: {
         nombre: '',
         cedula: '',
         tipoid: '',
-        Telefono: '',
+        telefono: '',
         correo: '',
         codConductor: '',
         nomConductor: '',
@@ -994,6 +994,7 @@ var fechaImpresion = new Date().toLocaleString();
              codigoConductor: this.editedItem.nomConductor,
              Fecha: firebase.firestore.Timestamp.fromDate(new Date()),  
              Entregado: this.editedItem.entregado,
+               
 
 
     })
