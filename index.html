@@ -162,7 +162,7 @@
                       
                         <v-row> 
                         
-                          <v-col cols="12" sm="6" md="4">
+                          <v-col cols="12" sm="4" md="4">
                             <v-dialog
                               ref="dialog"
                               v-model="modal"
@@ -188,7 +188,27 @@
                             </v-dialog>
                           </v-col>
                            <v-spacer></v-spacer>
-                        <v-col cols="12" sm="6" md="4">
+                           <v-col cols="12" sm="4" md="4">
+                            <v-alert
+                            color="primary"
+                            dark
+                            icon="mdi-vuetify"
+                            dense
+                          >
+                          <v-badge
+                          :content="totalDomicilios"
+                          :value="totalDomicilios"
+                          color="green"
+                          overlap
+                        >
+                          <v-icon large>mdi-email</v-icon>
+                        </v-badge>
+                          {{totalDomicilios}} Domicilios entregados 
+                          </v-alert>
+                         
+                        </v-col>
+
+                        <v-col cols="12" sm="4" md="4">
                           <v-dialog
                             ref="dialog2"
                             v-model="modal2"
@@ -219,6 +239,7 @@
               </v-list-item>
                         </v-list>
                         <template>
+                      
                           <div class="text-center d-print-none">
                             <v-btn rounded color="primary" dark @click="filtrarReporte">Mostrar Reporte</v-btn>
                           </div>
@@ -431,6 +452,7 @@
        switch2: false,
        readonly: false,
        entregado: false,
+       totalDomicilios : 0,
 
         /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
         /* mostrar tabla con filtros para reporte segun rango de fechas */
@@ -493,7 +515,7 @@
         visible: false,
          btnImprimir : false,
 
-        ebaisAutorizados: { Nombre: '', Codigo:''},
+        ebaisAutorizados: { Nombre: '', Codigo:'', Unidad:''},
         listaEbaisAutorizados: [],
        show1: false,
         password: '',
@@ -589,8 +611,6 @@
     },
 
    
-
-
   created () {
       firebase.auth().onAuthStateChanged((user) => {
         if (user) {
@@ -603,11 +623,19 @@
              //Leer documentos en Fire Base//
              ///////////////////////////////
             coleccion = 'Domicilios'//('Domicilios' + this.ebaisAutorizados.Codigo)  
-            console.log(coleccion + this.ebaisAutorizados.Unidad )
-            console.log  (this.ebaisAutorizados.Codigo)
-            console.log  (this.ebaisAutorizados.Nombre)
-            console.log  (this.ebaisAutorizados.Unidad)
-            console.log  (this.ebaisAutorizados.Unidad)
+            console.log(coleccion + this.ebaisAutorizados.Unidad + "<>>><<<<<" )
+           
+              if  (this.ebaisAutorizados.Unidad < 1){
+                alert("SE HA RECARGADO LA PAGINA -- DEBE VOLVER A INGRESAR AL SISTEMA")
+                this.visible=false
+                this.cerrarSesion()
+              } 
+             
+            
+            console.log  (this.ebaisAutorizados.Codigo + "0")
+            console.log  (this.ebaisAutorizados.Nombre + "1")
+            console.log  (this.ebaisAutorizados.Unidad + "2")
+           
             //coleccion= ('CopiasTelefono' )    
 
             // fechaActual = new Date()
@@ -706,6 +734,9 @@
 
                    });
                    console.log(querySnapshot.size);   
+                   this.totalDomicilios = (querySnapshot.size)
+                  
+
                    this.pacientes2 = []
                     this.pacientes2 = pacientes2
           });
@@ -764,8 +795,9 @@ var fechaImpresion = new Date().toLocaleString();
 		
 		doc.setFontSize(11)
 		doc.setFontType('bold')
+
 		doc.text(5, 25, 'Caja Costarricense de Seguro Social')
-		doc.text(5, 30, 'Area de Salud Limon')
+		doc.text(5, 30, this.ebaisAutorizados.Nombre)
 		doc.addImage(imgData, 'JPEG', 5,3, 18, 18)
 				doc.setLineWidth(0.2)
 				doc.line(5, 26, 190, 26)
@@ -818,6 +850,7 @@ var fechaImpresion = new Date().toLocaleString();
                     //console.log(`${doc.data()}`);
                      //console.log(doc.id, " => ", doc.data());
                      console.log(doc.id, " => ", doc.data().Autorizado);
+                     console.log(doc.id, " => ", doc.data().nombre);
                      console.log(" es usuario de avanzado => ", doc.data().Avanzado);
                      usuarioAvanzado = doc.data().Avanzado  
                      //console.log(db.collection.length) ///aqui nos quedamos
@@ -829,7 +862,7 @@ var fechaImpresion = new Date().toLocaleString();
                                 //console.log(miarray.length)
                                   //console.log(this.listaEbaisAutorizados.length)
                                   miarray =  doc.data().Autorizado
-                                  console.log (miarray +'es')  
+                                   
                                this.update()
                         });
                         
