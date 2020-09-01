@@ -1052,24 +1052,6 @@ var fechaImpresion = new Date().toLocaleString();
              codigoConductor: this.editedItem.nomConductor,
              Fecha: firebase.firestore.Timestamp.fromDate(new Date()),  
              Entregado: this.editedItem.entregado,
-               
-
-
-    })
-
-
-    db.collection(CopiasTelefono ).add({
-             TipoID: this.editedItem.tipoid,
-             Cedula: this.editedItem.cedula,
-             Nombre: this.editedItem.nombre,
-             Telefono: this.editedItem.telefono,
-             Correo: this.editedItem.correo,
-             Ebais: this.ebaisAutorizados.Codigo,
-             Direccion: this.editedItem.direccion,
-             Fecha: firebase.firestore.Timestamp.fromDate(new Date()),  
-             
-               
-
 
     })
 
