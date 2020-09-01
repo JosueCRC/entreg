@@ -192,18 +192,19 @@
                             <v-alert
                             color="primary"
                             dark
-                            icon="mdi-vuetify"
+                            
                             dense
                           >
                           <v-badge
                           :content="totalDomicilios"
                           :value="totalDomicilios"
-                          color="green"
+                          color="purple"
+                          large
                           overlap
                         >
-                          <v-icon large>mdi-email</v-icon>
+                          <v-icon>mdi-vuetify</v-icon>
                         </v-badge>
-                          {{totalDomicilios}} Domicilios entregados 
+                          Domicilios entregados 
                           </v-alert>
                          
                         </v-col>
@@ -250,6 +251,8 @@
                             :headers="encabezado"
                             :items="pacientes2"
                             class="elevation-1"
+                            :items-per-page="itemsPerPage"
+                            dense
                           >
                           <template v-slot:item.entregado="{ item }">
                             <v-simple-checkbox v-model="item.entregado" disabled></v-simple-checkbox>
@@ -324,7 +327,7 @@
                             ></v-select>
                           </v-col>
                           <v-col cols="12" sm="6" md="4">
-                            <v-text-field v-model.number="editedItem.cedula"  label="Indentificacion"  :counter="`${editedItem.tipoid.minimo}`"  ></v-text-field>
+                            <v-text-field v-model.number="editedItem.cedula"  label="Identificacion"  :counter="`${editedItem.tipoid.minimo}`" v-on:keyup.enter="mostrarDatosPaciente"   ></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="12" md="12">
                             <v-text-field v-model="editedItem.nombre" label="Nombre" ></v-text-field>
@@ -453,6 +456,7 @@
        readonly: false,
        entregado: false,
        totalDomicilios : 0,
+       itemsPerPage: 3,
 
         /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
         /* mostrar tabla con filtros para reporte segun rango de fechas */
@@ -630,8 +634,7 @@
                 this.visible=false
                 this.cerrarSesion()
               } 
-             
-            
+        
             console.log  (this.ebaisAutorizados.Codigo + "0")
             console.log  (this.ebaisAutorizados.Nombre + "1")
             console.log  (this.ebaisAutorizados.Unidad + "2")
@@ -745,9 +748,7 @@
 
   mostrarConductor: function(){
 
-
-
-        codigo = this.editedItem.codConductor
+ codigo = this.editedItem.codConductor
       console.log(codigo)
      /* db.collection("Conductores").where("Codigo", "==", codigo).onSnapshot((querySnapshot)=> {
         querySnapshot.forEach((doc) {
@@ -766,9 +767,7 @@
 
 */
 
-
-
-      db.collection("Conductores").where("Codigo", "==", codigo).onSnapshot((querySnapshot) => {   
+      db.collection("Conductores").where("Codigo", "=", codigo).onSnapshot((querySnapshot) => {   
                  querySnapshot.forEach((doc) => {                              
                     //console.log(`${doc.data()}`);
                      //console.log(doc.id, " => ", doc.data());
@@ -780,8 +779,34 @@
                         });
                                         
                     });
-
       },
+
+
+              //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*//
+             //        CARGAR INFORMACION EXITENTE EN  LA COLECCION COPÌAStELEFONO FIREBASE  // 
+             //*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-* //
+
+ mostrarDatosPaciente(){ 
+   identificacion = this.editedItem.cedula
+   console.log(identificacion)
+   console.log(this.editedItem.cedula)
+
+ /*  db.collection("CopiasTelefono").where("Cedula", "==", "700440896") */
+     db.collection("CopiasTelefono").where("Cedula", "==", this.editedItem.cedula).onSnapshot((querySnapshot) => {   
+                 querySnapshot.forEach((doc) => {                              
+                    //console.log(`${doc.data()}`);
+                     //console.log(doc.id, " => ", doc.data());
+                     console.log(doc.id, " => ", doc.data().Nombre);
+                     console.log(doc.id, " => ", doc.data().TipoID);
+                     //console.log(db.collection.length) ///aqui nos quedamos
+                     this.editedItem.tipoid = doc.data().TipoID
+                     this.editedItem.nombre=  doc.data().Nombre
+                     this.editedItem.direccion= doc.data().Direccion
+                     this.editedItem.telefono = doc.data().Telefono
+                        });
+                    });
+
+ }, 
 
 exportPDF() {
 var fechaImpresion = new Date().toLocaleString();   
