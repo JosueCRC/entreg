@@ -17,7 +17,8 @@
       <v-main>
         <template>
           <div>
-            <v-toolbar dark src="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg" >
+            <v-toolbar dark src="https://static.wixstatic.com/media/d35878_71ce718179fa4abcb31a803229c065bd~mv2.jpg/v1/fill/w_1847,h_774,al_c,q_85/d35878_71ce718179fa4abcb31a803229c065bd~mv2.webp" >
+            <!-- <v-toolbar dark src="https://cdn.vuetifyjs.com/images/backgrounds/vbanner.jpg" > -->
               <v-app-bar-nav-icon>
           <v-menu bottom left>
             <template v-slot:activator="{ on, attrs }">
@@ -309,7 +310,7 @@
                    
                   </v-row>
   
-                    <v-card-text>
+                    <v-card-text class="text-uppercase">
                       <v-container>
                         <v-row>
                           <v-col cols="12" sm="6" md="4">
@@ -329,24 +330,24 @@
                           <v-col cols="12" sm="6" md="4">
                             <v-text-field v-model.number="editedItem.cedula"  label="Identificacion"  :counter="`${editedItem.tipoid.minimo}`" v-on:keyup.enter="mostrarDatosPaciente"   ></v-text-field>
                           </v-col>
-                          <v-col cols="12" sm="12" md="12">
-                            <v-text-field v-model="editedItem.nombre" label="Nombre" ></v-text-field>
+                          <v-col cols="12" sm="12" md="12" >
+                            <v-text-field v-model="editedItem.nombre" label="Nombre"  ></v-text-field>
                           </v-col>
                           <v-col cols="12" sm="6" >
-                            <v-text-field v-model.number="editedItem.telefono" label="Telefono"></v-text-field>
+                            <v-text-field v-model.number="editedItem.telefono" label="Telefono 1"></v-text-field>
                           </v-col>
-                          <v-col cols="12" sm="6" >
+                           <v-col cols="12" sm="6" >
+                            <v-text-field v-model.number="editedItem.telefono2" label="Telefono 2"></v-text-field>
+                          </v-col>
+                         <!--  <v-col cols="12" sm="6" >
                             <v-text-field v-model="editedItem.correo" label="Correo"></v-text-field>
-                          </v-col>
-
-
-                         
-                          <v-col cols="12" sm="2" >
+                          </v-col> -->
+                         <!--  <v-col cols="12" sm="2" >
                             <v-text-field v-model.number="editedItem.codConductor" v-on:keyup.enter="mostrarConductor" label="Codigo"></v-text-field>
-                          </v-col>
-                          <v-col cols="12" sm="10" >
+                          </v-col> -->
+                          <!-- <v-col cols="12" sm="10" >
                             <v-text-field v-model="editedItem.nomConductor" label="Conductor"></v-text-field>
-                          </v-col>
+                          </v-col> -->
                         
 
                           <v-col cols="12" sm="12" md="12">
@@ -792,17 +793,20 @@
    console.log(this.editedItem.cedula)
 
  /*  db.collection("CopiasTelefono").where("Cedula", "==", "700440896") */
-     db.collection("CopiasTelefono").where("Cedula", "==", this.editedItem.cedula).onSnapshot((querySnapshot) => {   
+     db.collection("Domicilios2632").where("Cedula", "==", this.editedItem.cedula).onSnapshot((querySnapshot) => {   
                  querySnapshot.forEach((doc) => {                              
                     //console.log(`${doc.data()}`);
                      //console.log(doc.id, " => ", doc.data());
                      console.log(doc.id, " => ", doc.data().Nombre);
                      console.log(doc.id, " => ", doc.data().TipoID);
                      //console.log(db.collection.length) ///aqui nos quedamos
+
                      this.editedItem.tipoid = doc.data().TipoID
+                     
                      this.editedItem.nombre=  doc.data().Nombre
                      this.editedItem.direccion= doc.data().Direccion
                      this.editedItem.telefono = doc.data().Telefono
+                     this.editedItem.telefono2 = doc.data().Telefono2
                         });
                     });
 
@@ -834,17 +838,19 @@ var fechaImpresion = new Date().toLocaleString();
 		doc.text(5, 45, 'Cedula: '+ this.editedItem.cedula)
 		//doc.text(0, 50, 'Nombre: '+ this.editedItem.nombre)
 
-		var splitNombre = doc.splitTextToSize(this.editedItem.nombre, 75);
+		var splitNombre = doc.splitTextToSize(this.editedItem.nombre, 70);
 		doc.text(5, 50, splitNombre);
 
 		doc.setFontSize(13)
 		doc.setFontType('bold')	
 		doc.text(5, 60, 'Telefono: '+ this.editedItem.telefono)
+		doc.text(5, 65, 'Telefono 2: '+ this.editedItem.telefono)
+
 		doc.setFontSize(9)	
 		doc.setFontType('normal')
-		doc.text(5, 65, 'Ebais: '+ this.editedItem.ebais)
-		var splitTitle = doc.splitTextToSize(this.editedItem.direccion, 75);
-		doc.text(5, 70, splitTitle);
+		doc.text(5, 70, 'Ebais: '+ this.editedItem.ebais)
+		var splitTitle = doc.splitTextToSize(this.editedItem.direccion, 70);
+		doc.text(5, 75, splitTitle);
 		//doc.text(5, 67, 'Direccion: '+ this.editedItem.direccion)
 		doc.text(5, 90, 'Fecha Registro: '+ this.editedItem.fecha)
 
@@ -852,7 +858,7 @@ var fechaImpresion = new Date().toLocaleString();
 	    doc.setLineWidth(0.5)
 		doc.line(0, 105, 200, 105)
 		doc.setFontSize(10)
-    doc.text(5, 115, this.editedItem.correoUsuario)
+        //doc.text(5, 115, this.editedItem.correoUsuario)
 		doc.text(5, 120, this.editedItem.varid)
 		doc.save('domicilios.pdf');
 		
@@ -1014,11 +1020,12 @@ var fechaImpresion = new Date().toLocaleString();
               Cedula:this.editedItem.cedula,
               Nombre: this.editedItem.nombre,
               Telefono: this.editedItem.telefono,
-              Correo: this.editedItem.correo,
+               Telefono2: this.editedItem.telefono2,
+              //Correo: this.editedItem.correo,
               Ebais: this.editedItem.ebais,
               Usuario: this.correoUsuario,
-            nombreConductor: this.editedItem.codConductor,
-            codigoConductor: this.editedItem.nomConductor,
+            //nombreConductor: this.editedItem.codConductor,
+            //codigoConductor: this.editedItem.nomConductor,
               Direccion: this.editedItem.direccion,
               Entregado: this.editedItem.entregado
               //Fecha: firebase.firestore.Timestamp.fromDate(new Date()),              
@@ -1044,12 +1051,14 @@ var fechaImpresion = new Date().toLocaleString();
              Cedula: this.editedItem.cedula,
              Nombre: this.editedItem.nombre,
              Telefono: this.editedItem.telefono,
-             Correo: this.editedItem.correo,
+             Telefono2: this.editedItem.telefono2,
+
+             //Correo: this.editedItem.correo,
              Ebais: this.ebaisAutorizados.Codigo,
              Direccion: this.editedItem.direccion,
              Usuario: this.correoUsuario,
-             nombreConductor: this.editedItem.codConductor,
-             codigoConductor: this.editedItem.nomConductor,
+             //nombreConductor: this.editedItem.codConductor,
+             //codigoConductor: this.editedItem.nomConductor,
              Fecha: firebase.firestore.Timestamp.fromDate(new Date()),  
              Entregado: this.editedItem.entregado,
 
