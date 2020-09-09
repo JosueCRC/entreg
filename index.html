@@ -853,16 +853,16 @@ var fechaImpresion = new Date().toLocaleString();
 		var splitTitle = doc.splitTextToSize(this.editedItem.direccion, 70);
 		doc.text(5, 75, splitTitle);
 		//doc.text(5, 67, 'Direccion: '+ this.editedItem.direccion)
-		doc.text(5, 90, 'Fecha Registro: '+ this.editedItem.fecha)
+		doc.text(5, 95, 'Fecha Registro: '+ this.editedItem.fecha)
 
-	    doc.text(5, 95, 'Firma Recibido')
+	    doc.text(5, 100, 'Firma Recibido')
 	    doc.setLineWidth(0.5)
 		doc.line(0, 105, 200, 105)
 		doc.setFontSize(10)
         //doc.text(5, 115, this.editedItem.correoUsuario)
-		doc.text(5, 120, this.editedItem.varid)
+		doc.text(5, 110, this.editedItem.varid)
 		doc.save('domicilios.pdf');
-		
+    this.dialog = false
     },
 
       validarExisteUsuario(){
