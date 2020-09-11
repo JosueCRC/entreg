@@ -457,7 +457,7 @@
        readonly: false,
        entregado: false,
        totalDomicilios : 0,
-       itemsPerPage: 3,
+       itemsPerPage: 10,
 
         /*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*/
         /* mostrar tabla con filtros para reporte segun rango de fechas */
@@ -862,7 +862,7 @@ var fechaImpresion = new Date().toLocaleString();
 	    doc.setLineWidth(0.5)
 		doc.line(0, 105, 200, 105)
 		doc.setFontSize(10)
-        //doc.text(5, 115, this.editedItem.correoUsuario)
+    doc.text(5, 115, this.editedItem.correoUsuario)
 		doc.text(5, 110, this.editedItem.varid)
 		doc.save('domicilios.pdf');
     this.dialog = false
