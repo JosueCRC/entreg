@@ -59,7 +59,7 @@
                   label="username"       
                   value=""
                   v-model="correoUsuario"
-                  v-on:keyup="validarExisteUsuario"   
+                  v-on:keyup.enter="validarExisteUsuario"   
                   ></v-text-field>  
 
                       <v-select
